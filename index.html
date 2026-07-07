@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宅宅下班中｜節目製作甘特圖</title>
+<style>
+  :root{
+    --bg:#101320;
+    --panel:#181c2e;
+    --panel-2:#1f2440;
+    --line:#2b3152;
+    --ink:#e8eaf6;
+    --ink-dim:#9aa1c7;
+    --c-topic:#8b7ff5;
+    --c-read:#4da3ff;
+    --c-rec:#ff5d6c;
+    --c-edit:#ffb347;
+    --c-sched:#3fd6b0;
+    --c-air:#f5f0e6;
+    --c-solo:#5b628c;
+    --c-stock:#d4b968;
+    --now:#ff5d6c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    padding:20px 16px 48px;
+  }
+  .mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+  header{max-width:1220px;margin:0 auto 18px}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;letter-spacing:.22em;color:var(--c-rec);
+    border:1px solid var(--c-rec);border-radius:999px;
+    padding:4px 12px;margin-bottom:12px;
+  }
+  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c-rec);
+    animation:blink 1.6s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  @media (prefers-reduced-motion:reduce){.eyebrow::before{animation:none}}
+  h1{font-size:clamp(20px,4vw,30px);font-weight:800;letter-spacing:.02em}
+  h1 small{display:block;font-size:13px;font-weight:400;color:var(--ink-dim);margin-top:6px;letter-spacing:.08em}
+
+  .banner{max-width:1220px;margin:0 auto 12px;border:1px solid var(--c-edit);
+    background:rgba(255,179,71,.08);color:var(--c-edit);border-radius:10px;
+    padding:10px 14px;font-size:12.5px;display:none;line-height:1.7}
+  .banner.show{display:block}
+  .banner code{background:rgba(255,179,71,.15);padding:1px 6px;border-radius:4px;
+    font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+
+  .pipeline{max-width:1220px;margin:16px auto 8px;display:flex;flex-wrap:wrap;gap:8px;font-size:12.5px}
+  .step{display:flex;align-items:center;gap:7px;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;padding:7px 11px;color:var(--ink-dim)}
+  .step b{color:var(--ink);font-weight:600}
+  .dot{width:10px;height:10px;border-radius:3px;flex:none}
+  .dot.stock{background:transparent;border:2px dashed var(--c-stock)}
+
+  .board{max-width:1220px;margin:14px auto 0;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .board-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+  .board-head h2{font-size:15px;font-weight:700}
+  .board-head .hint{font-size:12px;color:var(--ink-dim)}
+  .weeknav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .weeknav button{
+    background:var(--panel-2);border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;
+  }
+  .weeknav button:hover{border-color:var(--c-rec)}
+  .weeknav button:disabled{opacity:.35;cursor:default}
+  .weeknav .cur{font-size:13px;font-weight:700;color:var(--now);min-width:110px;text-align:center}
+  .scroll{overflow-x:auto;padding:20px 16px 18px}
+
+  .gantt{display:grid;grid-auto-rows:34px;row-gap:6px;position:relative}
+  .wk{grid-row:1;align-self:center;justify-self:center;font-size:10px;color:var(--ink-dim);
+    text-align:center;line-height:1.3;cursor:pointer;border-radius:6px;padding:2px 4px}
+  .wk:hover{background:var(--panel-2)}
+  .wk b{display:block;color:var(--ink);font-weight:600}
+  .wk.active, .wk.active b{color:var(--now)}
+  .eplabel{grid-column:1;align-self:center;font-size:12px;font-weight:700;
+    color:var(--ink);white-space:nowrap;padding-right:10px;overflow:hidden;
+    text-overflow:ellipsis;line-height:1.35}
+  .eplabel small{display:block;font-weight:400;font-size:10px;color:var(--ink-dim);
+    overflow:hidden;text-overflow:ellipsis}
+  .eplabel .host{color:var(--c-read);font-weight:600}
+  .bar{align-self:center;height:16px;border-radius:4px;position:relative;opacity:.95;z-index:2}
+  .bar.rec{height:20px;border-radius:5px;box-shadow:0 0 10px rgba(255,93,108,.45)}
+  .bar.topic.done{opacity:.45}
+  .bar.topic.done::after{content:"✓";position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);font-size:11px;color:#fff;font-weight:700}
+  .bar.stock{background:transparent!important;border:2px dashed var(--c-stock);
+    height:14px;opacity:.85}
+  .bar.stock::after{content:"備用庫存";position:absolute;left:8px;top:50%;
+    transform:translateY(-50%);font-size:9.5px;color:var(--c-stock);white-space:nowrap;
+    letter-spacing:.08em}
+  .air{align-self:center;justify-self:center;width:14px;height:14px;background:var(--c-air);
+    transform:rotate(45deg);border-radius:2px;box-shadow:0 0 8px rgba(245,240,230,.5);z-index:2}
+  .air.solo{background:var(--c-solo);box-shadow:none;opacity:.9}
+  .gridline{position:absolute;top:40px;bottom:0;width:1px;background:var(--line);opacity:.45;pointer-events:none}
+  .soloband{position:absolute;top:40px;bottom:0;background:rgba(91,98,140,.16);
+    border-left:1px dashed var(--c-solo);border-right:1px dashed var(--c-solo);
+    pointer-events:none;z-index:1}
+  .soloband em{position:absolute;top:6px;left:50%;transform:translateX(-50%);
+    font-style:normal;font-size:10px;color:var(--c-solo);white-space:nowrap;
+    letter-spacing:.15em;font-weight:700}
+  .nowline{position:absolute;top:0;bottom:0;width:2px;background:var(--now);
+    box-shadow:0 0 12px rgba(255,93,108,.6);pointer-events:none;z-index:5;
+    transition:left .25s ease}
+  .nowtag{position:absolute;top:-4px;transform:translateX(-50%);
+    background:var(--now);color:#fff;font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:999px;white-space:nowrap;z-index:6;
+    transition:left .25s ease}
+
+  .slice{max-width:1220px;margin:16px auto 0;background:var(--panel-2);
+    border:1px solid var(--line);border-radius:14px;padding:16px}
+  .slice h2{font-size:15px;margin-bottom:4px}
+  .slice p.sub{font-size:12px;color:var(--ink-dim);margin-bottom:12px}
+  .slice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+  .task{border:1px solid var(--line);border-left-width:4px;border-radius:8px;
+    background:var(--panel);padding:10px 12px;font-size:12.5px}
+  .task b{display:block;font-size:13px;margin-bottom:3px}
+  .task span{color:var(--ink-dim)}
+  .empty{color:var(--ink-dim);font-size:13px;padding:8px 2px}
+
+  .notes{max-width:1220px;margin:16px auto 0;font-size:12.5px;color:var(--ink-dim);line-height:1.9}
+  .notes b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow mono">宅宅下班中 · PRODUCTION BOARD</div>
+  <h1>節目製作甘特圖
+    <small>資料來源：Google Sheet｜在 Sheet 新增一列，重新整理這頁就會出現｜點任一週看切面</small>
+  </h1>
+</header>
+
+<div class="banner" id="banner"></div>
+
+<div class="pipeline">
+  <div class="step"><span class="dot" style="background:var(--c-topic)"></span><b>選題確認</b>（✓ = 作品已定）</div>
+  <div class="step"><span class="dot" style="background:var(--c-read)"></span><b>閱讀準備</b></div>
+  <div class="step"><span class="dot" style="background:var(--c-rec)"></span><b>錄音</b></div>
+  <div class="step"><span class="dot" style="background:var(--c-edit)"></span><b>文案＋剪輯</b></div>
+  <div class="step"><span class="dot" style="background:var(--c-sched)"></span><b>排程上架</b></div>
+  <div class="step"><span class="dot stock"></span><b>備用庫存</b></div>
+  <div class="step"><span class="dot" style="background:var(--c-solo);border-radius:2px;transform:rotate(45deg)"></span><b>個人節目</b></div>
+</div>
+
+<div class="board">
+  <div class="board-head">
+    <h2 id="rangeTitle">載入中…</h2>
+    <div class="weeknav">
+      <button id="prevBtn">◀ 上一週</button>
+      <div class="cur mono" id="curLabel"></div>
+      <button id="nextBtn">下一週 ▶</button>
+      <button id="todayBtn">回到今天</button>
+      <button id="reloadBtn">↻ 重新載入資料</button>
+    </div>
+    <span class="hint">點日期標頭移動紅線；切面在下方即時更新</span>
+  </div>
+  <div class="scroll">
+    <div class="gantt" id="gantt"></div>
+  </div>
+</div>
+
+<div class="slice">
+  <h2 id="sliceTitle"></h2>
+  <p class="sub">紅線那一週的垂直切片 —— 同時處理不同節目、不同階段的實況。</p>
+  <div class="slice-grid" id="slice"></div>
+</div>
+
+<div class="notes">
+  <b>Google Sheet 欄位格式（第一列為標題列）：</b><br>
+  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」走完整管線）。③ <b>選書人</b>：可留空。④ <b>作品</b>：可留空——只填日期＝「已排檔期、待選題」，進入選題窗口會出現在切面待辦，逾期會顯示 🚨 警示。⑤ <b>錄音日期</b>：僅墊檔集需要，填批次錄音日。⑥ <b>備註</b>：自由填寫，會顯示在滑鼠提示中。<br>
+  <b>管線規則</b>：選題（播出前 13–11 週）→ 閱讀（前 11–5 週）→ 錄音完成（前 4 週）→ 文案剪輯完成（前 2 週）→ 排程完成（前 1 週）。切面會自動標示 ⚠ 死線。
+</div>
+
+<script>
+(function(){
+  /* ============================================================
+     設定區：只需要改這裡
+     1. 在 Google Sheet：檔案 → 共用 → 發布到網路 → 選工作表、格式選 CSV
+     2. 把產生的網址貼進下方引號中
+     ============================================================ */
+  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZwCjA_6nuu-pnlWabj2WXK2JxvOTnKIg9H2MylBYzE7UdV0pRormd7XpAK2sODc_wbp-YJVKcZhIr/pub?gid=1790075119&single=true&output=csv";   // ← 已連上你的 Google Sheet
+  const SEASON_START  = "2026/07/06"; // 甘特圖起算週的星期一
+  /* ============================================================ */
+
+  // 內建示範資料（尚未設定 Sheet 網址時顯示）
+  const SAMPLE_CSV = `播出日期,類型,選書人,作品,錄音日期,備註
+2026/07/10,推薦,植,月之徑的行旅者,,
+2026/07/17,推薦,植,人終將一死，不如先賣畫,,
+2026/07/24,推薦,植,音盤紀行,,
+2026/07/31,推薦,熊,藥命教師,,
+2026/08/07,個人,,宅宅朝聖去 冰島 EP1,,
+2026/08/14,個人,,宅宅朝聖去 冰島 EP2,,
+2026/08/21,個人,,宅宅朝聖去 冰島 EP3,,
+2026/08/28,個人,,宅宅朝聖去 冰島 EP4,,
+2026/09/04,個人,,宅宅朝聖去 冰島 EP5,,
+2026/09/11,個人,,宅宅朝聖去 冰島 EP6,,
+2026/09/18,推薦,梅,燈神 未償之願,,
+2026/09/25,推薦,植,魔女與傭兵,,
+2026/10/02,推薦,植,別對映像研出手,,
+2026/10/09,推薦,植,賽爾凡重生記,,
+2026/10/16,推薦,,蟬法師 隱疾三僧徒的尋妻奇旅,,
+2026/10/23,推薦,,神八小妹不可怕,,
+2026/10/30,推薦,,天堂的天平,,
+,墊檔,,墊檔 A（常青題待定）,2026/08/22,剪完封存不排程
+,墊檔,,墊檔 B（常青題待定）,2026/08/22,剪完封存不排程`;
+
+  const STAGES = [
+    {key:"topic", name:"選題確認", from:-13, to:-11},
+    {key:"read",  name:"閱讀準備", from:-11, to:-5},
+    {key:"rec",   name:"錄音",     from:-5,  to:-4},
+    {key:"edit",  name:"文案剪輯", from:-4,  to:-2},
+    {key:"sched", name:"排程",     from:-1,  to:-1},
+  ];
+  const NAMEOF = {topic:"選題確認",read:"閱讀準備",rec:"錄音",edit:"文案剪輯",sched:"排程",stock:"備用庫存"};
+  const GENERIC = {
+    topic:"敲定作品清單，並把錄音日直接訂進四人行事曆",
+    read:"閱讀期進行中：新作、重溫、涉獵並行",
+    rec:"批次錄音週：照錄音日計畫執行，可多錄墊檔",
+    edit:"文案＋剪輯進行中；⚠ 為完成死線那集，來不及就換墊檔或求救",
+    sched:"完成排程、上字、社群貼文",
+    stock:"庫存待命中，隨時可換上",
+  };
+
+  const COL_W = 44, LABEL_W = 168;
+  const DAY = 86400000;
+  const g = document.getElementById("gantt");
+  const banner = document.getElementById("banner");
+
+  function parseDateUTC(s){
+    const m = String(s||"").trim().match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if(!m) return null;
+    return Date.UTC(+m[1], +m[2]-1, +m[3]);
+  }
+  const seasonStart = parseDateUTC(SEASON_START);
+  const weekOf = ts => Math.floor((ts - seasonStart) / (7*DAY)) + 1;
+  function fridayLabel(w){
+    const d = new Date(seasonStart + (w-1)*7*DAY + 4*DAY);
+    return (d.getUTCMonth()+1) + "/" + d.getUTCDate();
+  }
+  function todayWeek(){
+    const n = new Date();
+    const ts = Date.UTC(n.getFullYear(), n.getMonth(), n.getDate());
+    return weekOf(ts);
+  }
+
+  // 簡易 CSV 解析（支援引號欄位）
+  function parseCSV(text){
+    const rows = [];
+    let row = [], cell = "", inQ = false;
+    for(let i=0; i<text.length; i++){
+      const c = text[i];
+      if(inQ){
+        if(c === '"'){ if(text[i+1] === '"'){ cell += '"'; i++; } else inQ = false; }
+        else cell += c;
+      }else{
+        if(c === '"') inQ = true;
+        else if(c === ','){ row.push(cell); cell = ""; }
+        else if(c === '\n' || c === '\r'){
+          if(c === '\r' && text[i+1] === '\n') i++;
+          row.push(cell); cell = "";
+          if(row.some(x => x.trim() !== "")) rows.push(row);
+          row = [];
+        }
+        else cell += c;
+      }
+    }
+    row.push(cell);
+    if(row.some(x => x.trim() !== "")) rows.push(row);
+    return rows;
+  }
+
+  function toEntries(csvText){
+    const rows = parseCSV(csvText);
+    if(rows.length < 2) return [];
+    const head = rows[0].map(h => h.trim());
+    const idx = name => head.findIndex(h => h.includes(name));
+    const iDate = idx("播出日期"), iType = idx("類型"), iHost = idx("選書人"),
+          iTitle = idx("作品"), iRec = idx("錄音日期"), iNote = idx("備註");
+    return rows.slice(1).map(r=>{
+      const get = i => (i >= 0 && r[i] !== undefined) ? String(r[i]).trim() : "";
+      return {
+        airTs: parseDateUTC(get(iDate)),
+        type:  get(iType) || "推薦",
+        host:  get(iHost),
+        title: get(iTitle),
+        recTs: parseDateUTC(get(iRec)),
+        note:  get(iNote),
+      };
+    }).filter(e => e.title || e.airTs);
+  }
+
+  let WEEKS = 24, TODAY_WEEK = 1, now = 1;
+  let team = [], solos = [], standbys = [];
+  let nl, tag, wkEls = [];
+
+  function build(entries){
+    // 分類
+    team = entries.filter(e => e.type !== "個人" && e.type !== "墊檔" && e.airTs)
+                  .map(e => ({...e, air: weekOf(e.airTs)}))
+                  .sort((a,b) => a.air - b.air);
+    solos = entries.filter(e => e.type === "個人" && e.airTs)
+                   .map(e => ({...e, air: weekOf(e.airTs)}))
+                   .sort((a,b) => a.air - b.air);
+    standbys = entries.filter(e => e.type === "墊檔")
+                      .map(e => ({...e, recW: e.recTs ? weekOf(e.recTs) : null}));
+
+    // 週數：涵蓋所有資料再加 4 週餘裕，最少 24 週
+    let maxW = 24;
+    team.forEach(e => maxW = Math.max(maxW, e.air + 1));
+    solos.forEach(e => maxW = Math.max(maxW, e.air + 1));
+    standbys.forEach(e => { if(e.recW) maxW = Math.max(maxW, e.recW + 6); });
+    WEEKS = maxW + 3;
+    TODAY_WEEK = Math.min(WEEKS, Math.max(1, todayWeek()));
+
+    // 重建畫布
+    g.innerHTML = "";
+    wkEls = [];
+    g.style.gridTemplateColumns = LABEL_W + "px repeat(" + WEEKS + ", " + COL_W + "px)";
+    g.style.minWidth = (LABEL_W + WEEKS*COL_W + 20) + "px";
+    const colOf = w => w + 1;
+
+    document.getElementById("rangeTitle").textContent =
+      fridayLabel(1) + " → " + fridayLabel(WEEKS) + "，共 " + WEEKS + " 週";
+
+    for(let w=1; w<=WEEKS; w++){
+      const el = document.createElement("div");
+      el.className = "wk mono";
+      el.style.gridColumn = colOf(w);
+      el.innerHTML = "<b>" + fridayLabel(w) + "</b>五";
+      el.title = "點我看這一週的切面";
+      el.addEventListener("click", ()=> setNow(w));
+      g.appendChild(el);
+      wkEls.push(el);
+    }
+    for(let w=2; w<=WEEKS; w++){
+      const gl = document.createElement("div");
+      gl.className = "gridline";
+      gl.style.left = (LABEL_W + (w-1)*COL_W) + "px";
+      g.appendChild(gl);
+    }
+
+    let row = 2;
+
+    // 個人節目列（合併為一列）
+    if(solos.length){
+      const minW = solos[0].air, maxWs = solos[solos.length-1].air;
+      const band = document.createElement("div");
+      band.className = "soloband";
+      band.style.left = (LABEL_W + (minW-1)*COL_W) + "px";
+      band.style.width = ((maxWs - minW + 1)*COL_W) + "px";
+      band.innerHTML = "<em>個人節目 " + fridayLabel(minW) + "–" + fridayLabel(maxWs) + "</em>";
+      g.appendChild(band);
+
+      const label = document.createElement("div");
+      label.className = "eplabel";
+      label.style.gridRow = row;
+      label.style.color = "var(--c-solo)";
+      label.innerHTML = "個人節目<small>共 " + solos.length + " 集</small>";
+      g.appendChild(label);
+      solos.forEach(e=>{
+        if(e.air < 1 || e.air > WEEKS) return;
+        const d = document.createElement("div");
+        d.className = "air solo";
+        d.style.gridRow = row;
+        d.style.gridColumn = colOf(e.air);
+        d.title = fridayLabel(e.air) + "《" + e.title + "》" + (e.note ? "｜" + e.note : "");
+        g.appendChild(d);
+      });
+      row++;
+    }
+
+    const addBar = (r, key, from, to, tip, done) => {
+      const f = Math.max(1, from), t = Math.min(WEEKS, to);
+      if(to < 1 || f > WEEKS || f > t) return;
+      const bar = document.createElement("div");
+      bar.className = "bar " + key + (key==="rec" ? " rec" : "") + (done ? " done" : "");
+      bar.style.gridRow = r;
+      bar.style.gridColumn = colOf(f) + " / " + (colOf(t)+1);
+      if(key !== "stock") bar.style.background = "var(--c-" + key + ")";
+      bar.title = tip + "｜" + NAMEOF[key] + (done ? "（已完成）" : "") +
+        "（" + fridayLabel(f) + " 那週 – " + fridayLabel(t) + " 那週）";
+      g.appendChild(bar);
+    };
+
+    // 團隊集數
+    team.forEach(ep=>{
+      const label = document.createElement("div");
+      label.className = "eplabel";
+      label.style.gridRow = row;
+      const sub = ep.title
+        ? "《" + ep.title + "》" + (ep.host ? "・<span class='host'>" + ep.host + "</span>" : "・選書人未定")
+        : "作品未定・待選題";
+      label.innerHTML = fridayLabel(ep.air) + " 集<small>" + sub + "</small>";
+      if(!ep.title){ label.style.opacity = .6; }
+      label.title = ep.note || "";
+      g.appendChild(label);
+      const epName = fridayLabel(ep.air) + " 集" + (ep.title ? "《" + ep.title + "》" : "（作品未定）");
+      STAGES.forEach(s=> addBar(row, s.key, ep.air + s.from, ep.air + s.to, epName, s.key==="topic" && !!ep.title));
+      if(ep.air >= 1 && ep.air <= WEEKS){
+        const d = document.createElement("div");
+        d.className = "air";
+        d.style.gridRow = row;
+        d.style.gridColumn = colOf(ep.air);
+        d.title = fridayLabel(ep.air) + " 播出";
+        g.appendChild(d);
+      }
+      row++;
+    });
+
+    // 墊檔集
+    standbys.forEach(sb=>{
+      const label = document.createElement("div");
+      label.className = "eplabel";
+      label.style.gridRow = row;
+      label.style.color = "var(--c-stock)";
+      label.innerHTML = "《" + sb.title + "》<small>墊檔・無播出日</small>";
+      label.title = sb.note || "";
+      g.appendChild(label);
+      if(sb.recW){
+        sb.stagesAbs = [
+          {key:"rec",   from:sb.recW,   to:sb.recW},
+          {key:"edit",  from:sb.recW+1, to:sb.recW+3},
+          {key:"stock", from:sb.recW+4, to:WEEKS},
+        ];
+      }else{
+        sb.stagesAbs = [{key:"stock", from:1, to:WEEKS}];
+      }
+      sb.stagesAbs.forEach(s=> addBar(row, s.key, s.from, s.to, "《" + sb.title + "》", false));
+      row++;
+    });
+
+    // 紅線
+    nl = document.createElement("div");
+    nl.className = "nowline";
+    g.appendChild(nl);
+    tag = document.createElement("div");
+    tag.className = "nowtag mono";
+    g.appendChild(tag);
+
+    setNow(TODAY_WEEK);
+  }
+
+  const slice = document.getElementById("slice");
+  const sliceTitle = document.getElementById("sliceTitle");
+
+  function renderSlice(){
+    slice.innerHTML = "";
+    const buckets = {};
+    ["topic","read","rec","edit","sched","stock"].forEach(k => buckets[k] = []);
+    const topicDone = [], airing = [], soloAiring = [];
+
+    team.forEach(ep=>{
+      const name = ep.title ? "《" + ep.title + "》" : fridayLabel(ep.air) + " 集（作品未定）";
+      if(ep.air === now) airing.push(name + "（" + fridayLabel(ep.air) + "）");
+      STAGES.forEach(s=>{
+        if(now >= ep.air + s.from && now <= ep.air + s.to){
+          if(s.key === "topic"){
+            if(ep.title){ topicDone.push(name); }
+            else{
+              let n = name;
+              if(now === ep.air + s.to) n += "〈⚠ 選題死線〉";
+              buckets.topic.push(n);
+            }
+            return;
+          }
+          let n = name;
+          if(s.key === "edit" && now === ep.air + s.to) n += "〈⚠ 剪輯死線〉";
+          if(s.key === "rec"  && now === ep.air + s.to) n += "〈錄音完成死線〉";
+          buckets[s.key].push(n);
+        }
+      });
+    });
+    // 選題逾期：已過選題窗口仍未定題
+    const overdue = team.filter(ep => !ep.title && now > ep.air - 11 && now < ep.air)
+                        .map(ep => fridayLabel(ep.air) + " 集");
+    solos.forEach(e=>{ if(e.air === now) soloAiring.push("《" + e.title + "》"); });
+    standbys.forEach(sb=>{
+      (sb.stagesAbs||[]).forEach(s=>{
+        if(now >= s.from && now <= s.to){
+          let n = "《" + sb.title + "》";
+          if(s.key === "edit" && now === s.to) n += "〈⚠ 剪輯死線〉";
+          buckets[s.key].push(n);
+        }
+      });
+    });
+
+    const ORDER = ["sched","edit","rec","read","topic","stock"];
+    let any = false;
+    if(overdue.length){
+      any = true;
+      const t = document.createElement("div");
+      t.className = "task";
+      t.style.borderLeftColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--c-rec").trim();
+      t.innerHTML = "<b>🚨 選題逾期｜" + overdue.join("、") + "</b><span>已超過選題窗口仍未定題——本週最優先：立刻定案，或改排輕量集／啟用墊檔</span>";
+      slice.appendChild(t);
+    }
+    ORDER.forEach(key=>{
+      if(!buckets[key].length) return;
+      any = true;
+      const t = document.createElement("div");
+      t.className = "task";
+      t.style.borderLeftColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--c-"+key).trim();
+      t.innerHTML = "<b>" + NAMEOF[key] + "｜" + buckets[key].join("、") + "</b><span>" + GENERIC[key] + "</span>";
+      slice.appendChild(t);
+    });
+    if(topicDone.length){
+      any = true;
+      const t = document.createElement("div");
+      t.className = "task";
+      t.style.borderLeftColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--c-topic").trim();
+      t.style.opacity = .8;
+      t.innerHTML = "<b>✓ 選題窗口（作品已定）｜" + topicDone.join("、") + "</b><span>已超前，無需動作</span>";
+      slice.appendChild(t);
+    }
+    if(airing.length){
+      any = true;
+      const t = document.createElement("div");
+      t.className = "task";
+      t.style.borderLeftColor = "#f5f0e6";
+      t.innerHTML = "<b>🎉 本週五播出｜" + airing.join("、") + "</b><span>排程應已於上週完成</span>";
+      slice.appendChild(t);
+    }
+    if(soloAiring.length){
+      any = true;
+      const t = document.createElement("div");
+      t.className = "task";
+      t.style.borderLeftColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--c-solo").trim();
+      t.innerHTML = "<b>◆ 個人節目播出｜" + soloAiring.join("、") + "</b><span>" + fridayLabel(now) + " 週五上架</span>";
+      slice.appendChild(t);
+    }
+    if(!any){
+      const e = document.createElement("div");
+      e.className = "empty";
+      e.textContent = "這一週沒有排定的管線工作。";
+      slice.appendChild(e);
+    }
+  }
+
+  function setNow(w){
+    now = Math.min(WEEKS, Math.max(1, w));
+    const x = LABEL_W + (now-1)*COL_W + COL_W/2;
+    nl.style.left = x + "px";
+    tag.style.left = x + "px";
+    tag.textContent = (now === TODAY_WEEK ? "本週 " : "週五 ") + fridayLabel(now);
+    wkEls.forEach((el,i)=> el.classList.toggle("active", i === now-1));
+    sliceTitle.textContent = "🔴 切面：週五 " + fridayLabel(now) + " 那一週" +
+      (now === TODAY_WEEK ? "（本週）" : now === TODAY_WEEK+1 ? "（下週）" : "");
+    document.getElementById("curLabel").textContent = "W" + now + " · " + fridayLabel(now);
+    document.getElementById("prevBtn").disabled = (now === 1);
+    document.getElementById("nextBtn").disabled = (now === WEEKS);
+    renderSlice();
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", ()=> setNow(now-1));
+  document.getElementById("nextBtn").addEventListener("click", ()=> setNow(now+1));
+  document.getElementById("todayBtn").addEventListener("click", ()=> setNow(TODAY_WEEK));
+  document.getElementById("reloadBtn").addEventListener("click", load);
+
+  async function load(){
+    if(!SHEET_CSV_URL){
+      banner.className = "banner show";
+      banner.innerHTML = "⚙️ 目前顯示的是<b>內建示範資料</b>。要連上 Google Sheet：在 Sheet 中「檔案 → 共用 → 發布到網路」，格式選 CSV，把網址貼進本檔案開頭的 <code>SHEET_CSV_URL</code>。";
+      build(toEntries(SAMPLE_CSV));
+      return;
+    }
+    try{
+      const res = await fetch(SHEET_CSV_URL + (SHEET_CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now());
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      const text = await res.text();
+      const entries = toEntries(text);
+      if(!entries.length) throw new Error("資料為空或欄位名稱不符");
+      banner.className = "banner";
+      build(entries);
+    }catch(err){
+      banner.className = "banner show";
+      banner.innerHTML = "⚠️ 無法載入 Google Sheet（" + err.message + "），暫以內建示範資料顯示。請確認 Sheet 已「發布到網路」且格式為 CSV。";
+      build(toEntries(SAMPLE_CSV));
+    }
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
