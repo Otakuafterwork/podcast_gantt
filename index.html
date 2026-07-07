@@ -174,7 +174,7 @@
 
 <div class="notes">
   <b>Google Sheet 欄位格式（第一列為標題列）：</b><br>
-  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」走完整管線）。③ <b>選書人</b>：可留空。④ <b>作品</b>：可留空——只填日期＝「已排檔期、待選題」，進入選題窗口會出現在切面待辦，逾期會顯示 🚨 警示。⑤ <b>錄音日期</b>：僅墊檔集需要，填批次錄音日。⑥ <b>備註</b>：自由填寫，會顯示在滑鼠提示中。<br>
+  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」走完整管線）。③ <b>剪輯者</b>：可留空。④ <b>作品</b>：可留空——只填日期＝「已排檔期、待選題」，進入選題窗口會出現在切面待辦，逾期會顯示 🚨 警示。⑤ <b>錄音日期</b>：僅墊檔集需要，填批次錄音日。⑥ <b>備註</b>：自由填寫，會顯示在滑鼠提示中。<br>
   <b>管線規則</b>：選題（播出前 13–11 週）→ 閱讀（前 11–5 週）→ 錄音完成（前 4 週）→ 文案剪輯完成（前 2 週）→ 排程完成（前 1 週）。切面會自動標示 ⚠ 死線。
 </div>
 
@@ -190,7 +190,7 @@
   /* ============================================================ */
 
   // 內建示範資料（尚未設定 Sheet 網址時顯示）
-  const SAMPLE_CSV = `播出日期,類型,選書人,作品,錄音日期,備註
+  const SAMPLE_CSV = `播出日期,類型,剪輯者,作品,錄音日期,備註
 2026/07/10,推薦,植,月之徑的行旅者,,
 2026/07/17,推薦,植,人終將一死，不如先賣畫,,
 2026/07/24,推薦,植,音盤紀行,,
@@ -281,7 +281,7 @@
     if(rows.length < 2) return [];
     const head = rows[0].map(h => h.trim());
     const idx = name => head.findIndex(h => h.includes(name));
-    const iDate = idx("播出日期"), iType = idx("類型"), iHost = idx("選書人"),
+    const iDate = idx("播出日期"), iType = idx("類型"), iHost = idx("剪輯者"),
           iTitle = idx("作品"), iRec = idx("錄音日期"), iNote = idx("備註");
     return rows.slice(1).map(r=>{
       const get = i => (i >= 0 && r[i] !== undefined) ? String(r[i]).trim() : "";
@@ -395,7 +395,7 @@
       label.className = "eplabel";
       label.style.gridRow = row;
       const sub = ep.title
-        ? "《" + ep.title + "》" + (ep.host ? "・<span class='host'>" + ep.host + "</span>" : "・選書人未定")
+        ? "《" + ep.title + "》" + (ep.host ? "・<span class='host'>" + ep.host + "</span>" : "・剪輯者未定")
         : "作品未定・待選題";
       label.innerHTML = fridayLabel(ep.air) + " 集<small>" + sub + "</small>";
       if(!ep.title){ label.style.opacity = .6; }
