@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>宅宅下班中｜節目製作甘特圖</title>
+<title>宅宅下班中｜節目製作看板</title>
 <style>
   :root{
     --bg:#101320;
@@ -15,12 +15,17 @@
     --c-topic:#8b7ff5;
     --c-read:#4da3ff;
     --c-rec:#ff5d6c;
+    --c-copy:#f2d16b;
     --c-edit:#ffb347;
     --c-sched:#3fd6b0;
     --c-air:#f5f0e6;
     --c-solo:#5b628c;
     --c-stock:#d4b968;
     --now:#ff5d6c;
+    --p-bugu:#8b7ff5;
+    --p-azhi:#3fd6b0;
+    --p-mei:#4da3ff;
+    --p-papa:#ffb347;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -29,7 +34,8 @@
     padding:20px 16px 48px;
   }
   .mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
-  header{max-width:1220px;margin:0 auto 18px}
+  .wrap{max-width:1220px;margin:0 auto}
+  header{max-width:1220px;margin:0 auto 16px}
   .eyebrow{
     display:inline-flex;align-items:center;gap:8px;
     font-size:11px;letter-spacing:.22em;color:var(--c-rec);
@@ -50,14 +56,53 @@
   .banner code{background:rgba(255,179,71,.15);padding:1px 6px;border-radius:4px;
     font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
 
-  .pipeline{max-width:1220px;margin:16px auto 8px;display:flex;flex-wrap:wrap;gap:8px;font-size:12.5px}
+  /* ── 接下來播出 ── */
+  .nextup{max-width:1220px;margin:0 auto 14px;background:linear-gradient(135deg,#1d2240,#181c2e);
+    border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+  .nextup .big{flex:1;min-width:240px}
+  .nextup .kicker{font-size:11px;letter-spacing:.2em;color:var(--c-sched);font-weight:700;margin-bottom:6px}
+  .nextup .title{font-size:clamp(17px,3vw,23px);font-weight:800;line-height:1.4}
+  .nextup .meta{font-size:12.5px;color:var(--ink-dim);margin-top:6px}
+  .nextup .after{font-size:12px;color:var(--ink-dim);border-left:1px solid var(--line);
+    padding-left:14px;line-height:1.9;min-width:180px}
+  .nextup .after b{color:var(--ink)}
+  .countdown{background:var(--c-sched);color:#0c2620;font-weight:800;font-size:13px;
+    padding:6px 14px;border-radius:999px;white-space:nowrap}
+
+  /* ── 四人看板 ── */
+  .crewsec{max-width:1220px;margin:0 auto 14px}
+  .crewsec h2{font-size:16px;font-weight:800;margin-bottom:10px}
+  .crewsec h2 span{font-size:12px;color:var(--ink-dim);font-weight:400;margin-left:8px}
+  .crew{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+  .person{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:14px;border-top:3px solid var(--line)}
+  .person h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .person h3 .pd{width:11px;height:11px;border-radius:50%;flex:none}
+  .person .role{font-size:11px;color:var(--ink-dim);margin:4px 0 10px;line-height:1.6}
+  .person .none{font-size:12.5px;color:var(--ink-dim);padding:4px 0}
+  .stagechip{display:inline-block;font-size:10px;font-weight:700;border-radius:4px;
+    padding:1px 6px;margin-right:6px;color:#0e1120;vertical-align:1px}
+  .sup{font-size:11px;color:var(--ink-dim);margin-top:10px;padding-top:8px;
+    border-top:1px dashed var(--line);letter-spacing:.08em;font-weight:700}
+
+  /* ── 職責範圍 ── */
+  .respsec{max-width:1220px;margin:0 auto 14px;background:var(--panel-2);
+    border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .respsec h2{font-size:14px;font-weight:800;margin-bottom:8px}
+  .resp{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;font-size:12px}
+  .resp div{display:flex;gap:8px;align-items:flex-start;color:var(--ink-dim);line-height:1.6}
+  .resp .pd{width:10px;height:10px;border-radius:50%;flex:none;margin-top:4px}
+  .resp b{color:var(--ink)}
+
+  .pipeline{max-width:1220px;margin:0 auto 8px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px}
   .step{display:flex;align-items:center;gap:7px;background:var(--panel);
-    border:1px solid var(--line);border-radius:8px;padding:7px 11px;color:var(--ink-dim)}
+    border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink-dim)}
   .step b{color:var(--ink);font-weight:600}
   .dot{width:10px;height:10px;border-radius:3px;flex:none}
   .dot.stock{background:transparent;border:2px dashed var(--c-stock)}
 
-  .board{max-width:1220px;margin:14px auto 0;background:var(--panel);
+  .board{max-width:1220px;margin:12px auto 0;background:var(--panel);
     border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .board-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
     padding:14px 16px 10px;border-bottom:1px solid var(--line)}
@@ -73,7 +118,7 @@
   .weeknav .cur{font-size:13px;font-weight:700;color:var(--now);min-width:110px;text-align:center}
   .scroll{overflow-x:auto;padding:20px 16px 18px}
 
-  .gantt{display:grid;grid-auto-rows:34px;row-gap:6px;position:relative}
+  .gantt{display:grid;grid-auto-rows:36px;row-gap:6px;position:relative}
   .wk{grid-row:1;align-self:center;justify-self:center;font-size:10px;color:var(--ink-dim);
     text-align:center;line-height:1.3;cursor:pointer;border-radius:6px;padding:2px 4px}
   .wk:hover{background:var(--panel-2)}
@@ -119,25 +164,27 @@
     padding:2px 8px;border-radius:999px;white-space:nowrap;z-index:6;
     transition:left .25s ease}
 
-  .slice{max-width:1220px;margin:16px auto 0;background:var(--panel-2);
+  .slice{max-width:1220px;margin:14px auto 0;background:var(--panel-2);
     border:1px solid var(--line);border-radius:14px;padding:16px}
   .slice h2{font-size:15px;margin-bottom:4px}
   .slice p.sub{font-size:12px;color:var(--ink-dim);margin-bottom:12px}
-  .slice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+  .slice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
   .task{border:1px solid var(--line);border-left-width:4px;border-radius:8px;
     background:var(--panel);padding:10px 12px;font-size:12.5px}
   .task b{display:block;font-size:13px;margin-bottom:3px}
-  .task span{color:var(--ink-dim)}
+  .task > span{color:var(--ink-dim);display:block;font-size:11.5px}
   .empty{color:var(--ink-dim);font-size:13px;padding:8px 2px}
   .todo{display:flex;align-items:flex-start;gap:8px;margin-top:7px;cursor:pointer;
     font-size:12.5px;color:var(--ink);line-height:1.5}
   .todo input{accent-color:var(--c-sched);width:16px;height:16px;margin-top:1px;
     flex:none;cursor:pointer}
-  .todo.checked span{color:var(--ink-dim);text-decoration:line-through}
+  .todo.checked .txt{color:var(--ink-dim);text-decoration:line-through}
   .todo.info{cursor:default;color:var(--ink-dim)}
-  .todo .dl{font-style:normal;color:var(--c-edit);font-weight:700;text-decoration:none;
-    display:inline-block}
+  .todo .dl{font-style:normal;color:var(--c-edit);font-weight:700;display:inline-block}
   .todo.checked .dl{opacity:.5}
+  .who{display:inline-block;font-size:10px;font-weight:700;border-radius:999px;
+    padding:1px 7px;margin-left:5px;vertical-align:1px;color:#0e1120}
+  .who.un{background:transparent;border:1px dashed var(--c-rec);color:var(--c-rec)}
 
   .notes{max-width:1220px;margin:16px auto 0;font-size:12.5px;color:var(--ink-dim);line-height:1.9}
   .notes b{color:var(--ink)}
@@ -147,24 +194,45 @@
 
 <header>
   <div class="eyebrow mono">宅宅下班中 · PRODUCTION BOARD</div>
-  <h1>節目製作甘特圖
-    <small>資料來源：Google Sheet｜在 Sheet 新增一列，重新整理這頁就會出現｜點任一週看切面</small>
+  <h1>節目製作看板
+    <small>資料來源：Google Sheet｜在 Sheet 新增或修改，重新整理本頁即同步</small>
   </h1>
 </header>
 
 <div class="banner" id="banner"></div>
 
+<!-- ① 接下來播出 -->
+<div class="nextup" id="nextup"></div>
+
+<!-- ② 四人本週看板 -->
+<div class="crewsec">
+  <h2 id="crewTitle">本週四人看板</h2>
+  <div class="crew" id="crew"></div>
+</div>
+
+<!-- ③ 職責範圍 -->
+<div class="respsec">
+  <h2>👥 職責範圍</h2>
+  <div class="resp">
+    <div><span class="pd" style="background:var(--p-bugu)"></span><span><b>布菇</b>｜時間軸監督——所有 🚨 逾期、⚠ 死線、未指派項目自動歸入她的看板追蹤</span></div>
+    <div><span class="pd" style="background:var(--p-azhi)"></span><span><b>阿植</b>｜全部排程上架（排程欄留空即預設指派給她）</span></div>
+    <div><span class="pd" style="background:var(--p-mei)"></span><span><b>大酸梅</b>｜參與的文案與剪輯（依 Sheet 文案／剪輯欄指派）＋擔任講者的集數閱讀與錄音</span></div>
+    <div><span class="pd" style="background:var(--p-papa)"></span><span><b>趴趴熊</b>｜參與的文案與剪輯（依 Sheet 文案／剪輯欄指派）＋擔任講者的集數閱讀與錄音</span></div>
+  </div>
+</div>
+
 <div class="pipeline">
-  <div class="step"><span class="dot" style="background:var(--c-topic)"></span><b>選題確認</b>（✓ = 作品已定）</div>
-  <div class="step"><span class="dot" style="background:var(--c-read)"></span><b>閱讀準備</b></div>
+  <div class="step"><span class="dot" style="background:var(--c-topic)"></span><b>選題</b>（✓=已定）</div>
+  <div class="step"><span class="dot" style="background:var(--c-read)"></span><b>閱讀</b></div>
   <div class="step"><span class="dot" style="background:var(--c-rec)"></span><b>錄音</b></div>
   <div class="step"><span class="dot" style="background:var(--c-edit)"></span><b>文案＋剪輯</b></div>
-  <div class="step"><span class="dot" style="background:var(--c-sched)"></span><b>排程上架</b></div>
+  <div class="step"><span class="dot" style="background:var(--c-sched)"></span><b>排程</b></div>
   <div class="step"><span style="width:16px;height:16px;border-radius:50%;border:2px solid var(--c-rec);display:inline-flex;align-items:center;justify-content:center;font-size:8px;flex:none">🎙</span><b>錄音日已定</b></div>
   <div class="step"><span class="dot stock"></span><b>備用庫存</b></div>
   <div class="step"><span class="dot" style="background:var(--c-solo);border-radius:2px;transform:rotate(45deg)"></span><b>個人節目</b></div>
 </div>
 
+<!-- ④ 甘特圖 -->
 <div class="board">
   <div class="board-head">
     <h2 id="rangeTitle">載入中…</h2>
@@ -175,13 +243,14 @@
       <button id="todayBtn">回到今天</button>
       <button id="reloadBtn">↻ 重新載入資料</button>
     </div>
-    <span class="hint">點日期標頭移動紅線；切面在下方即時更新</span>
+    <span class="hint">點日期標頭移動紅線；下方切面跟著更新</span>
   </div>
   <div class="scroll">
     <div class="gantt" id="gantt"></div>
   </div>
 </div>
 
+<!-- ⑤ 週次瀏覽切面 -->
 <div class="slice">
   <h2 id="sliceTitle"></h2>
   <p class="sub">紅線那一週的待辦清單 —— 勾選追蹤進度（勾勾存在你自己的裝置上）。 <span id="progress" class="mono" style="color:var(--c-sched);font-weight:700"></span></p>
@@ -189,43 +258,56 @@
 </div>
 
 <div class="notes">
-  <b>Google Sheet 欄位格式（第一列為標題列）：</b><br>
-  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」走完整管線）。③ <b>選書人</b>：可留空。④ <b>作品</b>：可留空——只填日期＝「已排檔期、待選題」，進入選題窗口會出現在切面待辦，逾期會顯示 🚨 警示。⑤ <b>錄音日期</b>：任何集數皆可填（YYYY/MM/DD）——填了會在甘特圖顯示 🎙 圓點，切面待辦改以實際錄音日為準；晚於「播出前四週」死線會以橘色警示。墊檔集也用此欄。⑥ <b>備註</b>：自由填寫，會顯示在滑鼠提示中。<br>
-  <b>管線規則</b>：選題（播出前 13–11 週）→ 閱讀（前 11–5 週）→ 錄音完成（前 4 週）→ 文案剪輯完成（前 2 週）→ 排程完成（前 1 週）。切面會自動標示 ⚠ 死線。
+  <b>Google Sheet 欄位格式（第一列為標題列，順序不限，可有多餘欄位）：</b><br>
+  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」）。③ <b>講者</b>：這集上場的人，可多人（例：梅、熊）；閱讀與錄音會指派給講者。找不到「講者」欄時退回讀「選書人」欄。④ <b>作品</b>：可留空＝已排檔期待選題，逾期會顯示 🚨。⑤ <b>錄音日期</b>：任何集數皆可填，會顯示 🎙 圓點且切面以實際日期為準；晚於播出前四週會警示。⑥ <b>文案</b>：撰寫文案的人。⑦ <b>剪輯</b>：剪輯的人。⑧ <b>排程</b>：可留空，預設阿植。⑨ <b>備註</b>：自由填寫。<br>
+  <b>人名寫法</b>：全名或簡稱皆可辨識（大酸梅／酸梅／梅、阿植／植、趴趴熊／熊、布菇／菇），多人用頓號或逗號分隔。<br>
+  <b>管線規則</b>：選題（前 13–11 週）→ 閱讀（前 11–5 週）→ 錄音完成（前 4 週）→ 文案剪輯完成（前 2 週）→ 排程完成（前 1 週）。
 </div>
 
 <script>
 (function(){
   /* ============================================================
-     設定區：只需要改這裡
-     1. 在 Google Sheet：檔案 → 共用 → 發布到網路 → 選工作表、格式選 CSV
-     2. 把產生的網址貼進下方引號中
+     設定區
      ============================================================ */
-  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZwCjA_6nuu-pnlWabj2WXK2JxvOTnKIg9H2MylBYzE7UdV0pRormd7XpAK2sODc_wbp-YJVKcZhIr/pub?gid=1790075119&single=true&output=csv";   // ← 已連上你的 Google Sheet
+  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZwCjA_6nuu-pnlWabj2WXK2JxvOTnKIg9H2MylBYzE7UdV0pRormd7XpAK2sODc_wbp-YJVKcZhIr/pub?gid=1790075119&single=true&output=csv";
   const SEASON_START  = "2026/07/06"; // 甘特圖起算週的星期一
   /* ============================================================ */
 
-  // 內建示範資料（尚未設定 Sheet 網址時顯示）
-  const SAMPLE_CSV = `播出日期,類型,選書人,作品,錄音日期,備註
-2026/07/10,推薦,植,月之徑的行旅者,,
-2026/07/17,推薦,植,人終將一死，不如先賣畫,,
-2026/07/24,推薦,植,音盤紀行,,
-2026/07/31,推薦,熊,藥命教師,,
-2026/08/07,個人,,宅宅朝聖去 冰島 EP1,,
-2026/08/14,個人,,宅宅朝聖去 冰島 EP2,,
-2026/08/21,個人,,宅宅朝聖去 冰島 EP3,,
-2026/08/28,個人,,宅宅朝聖去 冰島 EP4,,
-2026/09/04,個人,,宅宅朝聖去 冰島 EP5,,
-2026/09/11,個人,,宅宅朝聖去 冰島 EP6,,
-2026/09/18,推薦,梅,燈神 未償之願,,
-2026/09/25,推薦,植,魔女與傭兵,,
-2026/10/02,推薦,植,別對映像研出手,,
-2026/10/09,推薦,植,賽爾凡重生記,,
-2026/10/16,推薦,,蟬法師 隱疾三僧徒的尋妻奇旅,,
-2026/10/23,推薦,,神八小妹不可怕,,
-2026/10/30,推薦,,天堂的天平,,
-,墊檔,,墊檔 A（常青題待定）,2026/08/22,剪完封存不排程
-,墊檔,,墊檔 B（常青題待定）,2026/08/22,剪完封存不排程`;
+  const PEOPLE = [
+    {name:"布菇",   aliases:["布菇","菇"],            color:"var(--p-bugu)", hex:"#8b7ff5"},
+    {name:"阿植",   aliases:["阿植","植"],            color:"var(--p-azhi)", hex:"#3fd6b0"},
+    {name:"大酸梅", aliases:["大酸梅","酸梅","梅"],   color:"var(--p-mei)",  hex:"#4da3ff"},
+    {name:"趴趴熊", aliases:["趴趴熊","趴趴","熊"],   color:"var(--p-papa)", hex:"#ffb347"},
+  ];
+  const ALLNAMES = PEOPLE.map(p=>p.name);
+  const SUPERVISOR = "布菇";
+  const SCHEDULER = "阿植";
+  const personOf = n => PEOPLE.find(p=>p.name===n);
+  function matchPeople(str){
+    const s = String(str||"");
+    return PEOPLE.filter(p => p.aliases.some(a => s.includes(a))).map(p=>p.name);
+  }
+
+  const SAMPLE_CSV = `播出日期,類型,講者,作品,錄音日期,文案,剪輯,排程,備註
+2026/07/10,推薦,植,月之徑的行旅者,,,,,
+2026/07/17,推薦,植,人終將一死，不如先賣畫,,,,,
+2026/07/24,推薦,植,音盤紀行,,,,,
+2026/07/31,推薦,熊,藥命教師,,,,,
+2026/08/07,個人,熊,宅宅朝聖去 冰島 EP1,,,,,
+2026/08/14,個人,熊,宅宅朝聖去 冰島 EP2,,,,,
+2026/08/21,個人,熊,宅宅朝聖去 冰島 EP3,,,,,
+2026/08/28,個人,熊,宅宅朝聖去 冰島 EP4,,,,,
+2026/09/04,個人,熊,宅宅朝聖去 冰島 EP5,,,,,
+2026/09/11,個人,熊,宅宅朝聖去 冰島 EP6,,,,,
+2026/09/18,推薦,梅,燈神 未償之願,,,,,
+2026/09/25,推薦,植,魔女與傭兵,,,,,
+2026/10/02,推薦,植,別對映像研出手,,,,,
+2026/10/09,推薦,植,賽爾凡重生記,,,,,
+2026/10/16,推薦,,蟬法師 隱疾三僧徒的尋妻奇旅,,,,,
+2026/10/23,推薦,,神八小妹不可怕,,,,,
+2026/10/30,推薦,,天堂的天平,,,,,
+,墊檔,,墊檔 A（常青題待定）,2026/08/22,,,,剪完封存不排程
+,墊檔,,墊檔 B（常青題待定）,2026/08/22,,,,剪完封存不排程`;
 
   const STAGES = [
     {key:"topic", name:"選題確認", from:-13, to:-11},
@@ -234,17 +316,19 @@
     {key:"edit",  name:"文案剪輯", from:-4,  to:-2},
     {key:"sched", name:"排程",     from:-1,  to:-1},
   ];
-  const NAMEOF = {topic:"選題確認",read:"閱讀準備",rec:"錄音",edit:"文案剪輯",sched:"排程",stock:"備用庫存"};
+  const NAMEOF = {topic:"選題確認",read:"閱讀準備",rec:"錄音",copy:"文案撰寫",edit:"剪輯",sched:"排程",stock:"備用庫存"};
   const GENERIC = {
-    topic:"敲定作品清單，並把錄音日直接訂進四人行事曆",
+    topic:"敲定作品清單，並把錄音日訂進行事曆（填入 Sheet 錄音日期欄）",
     read:"閱讀期進行中：新作、重溫、涉獵並行",
-    rec:"批次錄音週：照錄音日計畫執行，可多錄墊檔",
-    edit:"文案＋剪輯進行中；⚠ 為完成死線那集，來不及就換墊檔或求救",
+    rec:"照錄音日計畫執行，可多錄墊檔",
+    copy:"撰寫本集文案",
+    edit:"剪輯進行中；⚠ 為完成死線那集，來不及就換墊檔或求救",
     sched:"完成排程、上字、社群貼文",
     stock:"庫存待命中，隨時可換上",
   };
+  const STAGECOLOR = {topic:"--c-topic",read:"--c-read",rec:"--c-rec",copy:"--c-copy",edit:"--c-edit",sched:"--c-sched",stock:"--c-stock"};
 
-  const COL_W = 44, LABEL_W = 168;
+  const COL_W = 44, LABEL_W = 190;
   const DAY = 86400000;
   const g = document.getElementById("gantt");
   const banner = document.getElementById("banner");
@@ -267,11 +351,9 @@
   }
   function todayWeek(){
     const n = new Date();
-    const ts = Date.UTC(n.getFullYear(), n.getMonth(), n.getDate());
-    return weekOf(ts);
+    return weekOf(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()));
   }
 
-  // 簡易 CSV 解析（支援引號欄位）
   function parseCSV(text){
     const rows = [];
     let row = [], cell = "", inQ = false;
@@ -302,16 +384,22 @@
     if(rows.length < 2) return [];
     const head = rows[0].map(h => h.trim());
     const idx = name => head.findIndex(h => h.includes(name));
-    const iDate = idx("播出日期"), iType = idx("類型"), iHost = idx("選書人"),
-          iTitle = idx("作品"), iRec = idx("錄音日期"), iNote = idx("備註");
+    const iDate = idx("播出日期"), iType = idx("類型"),
+          iSpk = idx("講者"), iHost = idx("選書人"),
+          iTitle = idx("作品"), iRec = idx("錄音日期"),
+          iCopy = idx("文案"), iEdit = idx("剪輯"), iSch = idx("排程"),
+          iNote = idx("備註");
     return rows.slice(1).map(r=>{
       const get = i => (i >= 0 && r[i] !== undefined) ? String(r[i]).trim() : "";
       return {
         airTs: parseDateUTC(get(iDate)),
         type:  get(iType) || "推薦",
-        host:  get(iHost),
+        spk:   get(iSpk) || get(iHost),
         title: get(iTitle),
         recTs: parseDateUTC(get(iRec)),
+        copy:  get(iCopy),
+        edit:  get(iEdit),
+        sch:   get(iSch),
         note:  get(iNote),
       };
     }).filter(e => e.title || e.airTs);
@@ -321,8 +409,198 @@
   let team = [], solos = [], standbys = [];
   let nl, tag, wkEls = [];
 
+  /* ── 本週待辦計算（供切面與四人看板共用）── */
+  function computeWeekItems(w){
+    const todos = [], infos = [];
+    team.forEach(ep=>{
+      const name = ep.title ? "《" + ep.title + "》" : fridayLabel(ep.air) + " 集（作品未定）";
+      const spkPeople = matchPeople(ep.spk);
+      if(ep.air === w) infos.push({group:"air", base:name + (spkPeople.length ? "｜講者 " + spkPeople.join("、") : "")});
+
+      STAGES.forEach(s=>{
+        if(!(w >= ep.air + s.from && w <= ep.air + s.to)) return;
+        if(s.key === "topic"){
+          if(ep.title){ infos.push({group:"topicDone", base:name}); }
+          else{
+            todos.push({key:"topic", base:name + "：定案作品",
+              warn:(w === ep.air + s.to) ? "⚠ 選題死線" : null, people:ALLNAMES.slice()});
+          }
+          return;
+        }
+        if(s.key === "read"){
+          todos.push({key:"read", base:name,
+            warn:null, people:spkPeople.length ? spkPeople : ALLNAMES.slice()});
+          return;
+        }
+        if(s.key === "rec"){
+          if(ep.recTs) return; // 已定錄音日：由實際日期驅動
+          todos.push({key:"rec", base:name,
+            warn:(w === ep.air + s.to) ? "錄音完成死線" : null,
+            people:spkPeople.length ? spkPeople : ALLNAMES.slice()});
+          return;
+        }
+        if(s.key === "edit"){
+          const warn = (w === ep.air + s.to) ? "⚠ 剪輯死線" : null;
+          todos.push({key:"copy", base:name + "：文案", warn:warn, people:matchPeople(ep.copy)});
+          todos.push({key:"edit", base:name + "：剪輯", warn:warn, people:matchPeople(ep.edit)});
+          return;
+        }
+        if(s.key === "sched"){
+          const p = matchPeople(ep.sch);
+          todos.push({key:"sched", base:name, warn:null, people:p.length ? p : [SCHEDULER]});
+        }
+      });
+      if(ep.recTs && weekOf(ep.recTs) === w){
+        todos.push({key:"rec", base:name + "（錄音日 " + dateLabel(ep.recTs) + "）",
+          warn:(weekOf(ep.recTs) > ep.air - 4) ? "⚠ 晚於錄音死線" : null,
+          people:spkPeople.length ? spkPeople : ALLNAMES.slice()});
+      }
+    });
+    // 選題逾期
+    team.forEach(ep=>{
+      if(!ep.title && w > ep.air - 11 && w < ep.air){
+        todos.push({key:"topic", base:fridayLabel(ep.air) + " 集：定案作品",
+          warn:"🚨 已逾期", people:ALLNAMES.slice(), overdue:true});
+      }
+    });
+    solos.forEach(e=>{
+      if(e.air === w) infos.push({group:"solo", base:"《" + e.title + "》"});
+    });
+    standbys.forEach(sb=>{
+      (sb.stagesAbs||[]).forEach(s=>{
+        if(!(w >= s.from && w <= s.to)) return;
+        if(s.key === "stock"){ infos.push({group:"stock", base:"《" + sb.title + "》"}); return; }
+        if(s.key === "rec"){
+          todos.push({key:"rec", base:"《" + sb.title + "》" + (sb.recTs ? "（錄音日 " + dateLabel(sb.recTs) + "）" : ""),
+            warn:null, people:matchPeople(sb.spk).length ? matchPeople(sb.spk) : ALLNAMES.slice()});
+          return;
+        }
+        if(s.key === "edit"){
+          const warn = (w === s.to) ? "⚠ 剪輯死線" : null;
+          todos.push({key:"copy", base:"《" + sb.title + "》：文案", warn:warn, people:matchPeople(sb.copy)});
+          todos.push({key:"edit", base:"《" + sb.title + "》：剪輯", warn:warn, people:matchPeople(sb.edit)});
+        }
+      });
+    });
+    return {todos, infos};
+  }
+
+  /* ── 打勾狀態 ── */
+  const STORE_KEY = "gantt_todo_v1";
+  function loadTodos(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||"{}"); }catch(e){ return {}; } }
+  function saveTodos(o){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(o)); }catch(e){} }
+  const todoId = (w, it) => "w" + w + "|" + it.key + "|" + it.base;
+
+  function whoChips(it){
+    if(!it.people.length) return " <span class='who un'>未指派</span>";
+    return it.people.map(n=>{
+      const p = personOf(n);
+      return " <span class='who' style='background:" + p.hex + "'>" + n + "</span>";
+    }).join("");
+  }
+
+  function makeTodoRow(w, it, showWho){
+    const ticks = loadTodos();
+    const id = todoId(w, it);
+    const lab = document.createElement("label");
+    lab.className = "todo" + (ticks[id] ? " checked" : "");
+    lab.innerHTML = "<input type='checkbox'" + (ticks[id] ? " checked" : "") + ">" +
+      "<span class='txt'>" + it.base +
+      (it.warn ? " <em class='dl'>〈" + it.warn + "〉</em>" : "") +
+      (showWho ? whoChips(it) : "") + "</span>";
+    lab.querySelector("input").addEventListener("change", ev=>{
+      const t = loadTodos();
+      if(ev.target.checked) t[id] = 1; else delete t[id];
+      saveTodos(t);
+      refreshBoards();
+    });
+    return lab;
+  }
+
+  /* ── ① 接下來播出 ── */
+  function renderNextUp(){
+    const el = document.getElementById("nextup");
+    const upcoming = [
+      ...team.map(e=>({...e, kind:"team"})),
+      ...solos.map(e=>({...e, kind:"solo"}))
+    ].filter(e => e.air >= TODAY_WEEK).sort((a,b)=> a.air - b.air);
+    if(!upcoming.length){ el.innerHTML = "<div class='big'><div class='title'>目前沒有已排定的播出</div></div>"; return; }
+    const next = upcoming[0];
+    const later = upcoming.filter(e => e.air > next.air).slice(0,2);
+    const spk = matchPeople(next.spk);
+    const wksAway = next.air - TODAY_WEEK;
+    const cd = wksAway === 0 ? "本週五" : wksAway === 1 ? "下週五" : wksAway + " 週後";
+    el.innerHTML =
+      "<div class='big'>" +
+        "<div class='kicker'>▶ 接下來播出 NEXT UP</div>" +
+        "<div class='title'>" + fridayLabel(next.air) + "（五）《" + (next.title||"作品未定") + "》" +
+          (next.kind==="solo" ? "・個人節目" : "") + "</div>" +
+        "<div class='meta'>" + (spk.length ? "講者：" + spk.join("、") : "講者未定") +
+          (next.note ? "｜" + next.note : "") + "</div>" +
+      "</div>" +
+      "<div class='countdown'>" + cd + "</div>" +
+      (later.length ?
+        "<div class='after'>再來<br>" + later.map(e =>
+          "<b>" + fridayLabel(e.air) + "</b>《" + (e.title||"未定") + "》").join("<br>") + "</div>"
+        : "");
+  }
+
+  /* ── ② 四人本週看板 ── */
+  function renderCrew(){
+    const w = TODAY_WEEK;
+    document.getElementById("crewTitle").innerHTML =
+      "🗓 本週四人看板 <span>週五 " + fridayLabel(w) + " 那一週｜各自的待辦</span>";
+    const {todos} = computeWeekItems(w);
+    const crew = document.getElementById("crew");
+    crew.innerHTML = "";
+    PEOPLE.forEach(p=>{
+      const card = document.createElement("div");
+      card.className = "person";
+      card.style.borderTopColor = p.hex;
+      const role = p.name === SUPERVISOR ? "時間軸監督" :
+                   p.name === SCHEDULER ? "排程負責" : "文案／剪輯／講者";
+      card.innerHTML = "<h3><span class='pd' style='background:" + p.hex + "'></span>" +
+        p.name + "</h3><div class='role'>" + role + "</div>";
+
+      const mine = todos.filter(it => it.people.includes(p.name));
+      if(mine.length){
+        mine.forEach(it=>{
+          const rowEl = makeTodoRow(w, it, false);
+          const chip = document.createElement("span");
+          chip.className = "stagechip";
+          chip.style.background = getComputedStyle(document.documentElement)
+            .getPropertyValue(STAGECOLOR[it.key]).trim();
+          chip.textContent = NAMEOF[it.key];
+          rowEl.querySelector(".txt").prepend(chip);
+          card.appendChild(rowEl);
+        });
+      }else{
+        const n = document.createElement("div");
+        n.className = "none";
+        n.textContent = "本週沒有指派給你的項目 🎉";
+        card.appendChild(n);
+      }
+
+      if(p.name === SUPERVISOR){
+        const watch = todos.filter(it =>
+          (it.warn || !it.people.length) && !it.people.includes(p.name));
+        if(watch.length){
+          const h = document.createElement("div");
+          h.className = "sup";
+          h.textContent = "👁 監督追蹤（死線／逾期／未指派）";
+          card.appendChild(h);
+          watch.forEach(it=>{
+            const rowEl = makeTodoRow(w, it, true);
+            card.appendChild(rowEl);
+          });
+        }
+      }
+      crew.appendChild(card);
+    });
+  }
+
+  /* ── 甘特圖 ── */
   function build(entries){
-    // 分類
     team = entries.filter(e => e.type !== "個人" && e.type !== "墊檔" && e.airTs)
                   .map(e => ({...e, air: weekOf(e.airTs)}))
                   .sort((a,b) => a.air - b.air);
@@ -332,7 +610,6 @@
     standbys = entries.filter(e => e.type === "墊檔")
                       .map(e => ({...e, recW: e.recTs ? weekOf(e.recTs) : null}));
 
-    // 週數：涵蓋所有資料再加 4 週餘裕，最少 24 週
     let maxW = 24;
     team.forEach(e => maxW = Math.max(maxW, e.air + 1));
     solos.forEach(e => maxW = Math.max(maxW, e.air + 1));
@@ -340,7 +617,6 @@
     WEEKS = maxW + 3;
     TODAY_WEEK = Math.min(WEEKS, Math.max(1, todayWeek()));
 
-    // 重建畫布
     g.innerHTML = "";
     wkEls = [];
     g.style.gridTemplateColumns = LABEL_W + "px repeat(" + WEEKS + ", " + COL_W + "px)";
@@ -369,7 +645,6 @@
 
     let row = 2;
 
-    // 個人節目列（合併為一列）
     if(solos.length){
       const minW = solos[0].air, maxWs = solos[solos.length-1].air;
       const band = document.createElement("div");
@@ -410,17 +685,27 @@
       g.appendChild(bar);
     };
 
-    // 團隊集數
     team.forEach(ep=>{
       const label = document.createElement("div");
       label.className = "eplabel";
       label.style.gridRow = row;
+      const spkPeople = matchPeople(ep.spk);
+      const parts = [];
+      if(spkPeople.length) parts.push("講 <span class='host'>" + spkPeople.join("、") + "</span>");
+      const copyP = matchPeople(ep.copy);
+      if(copyP.length) parts.push("文 " + copyP.join("、"));
+      const editP = matchPeople(ep.edit);
+      if(editP.length) parts.push("剪 " + editP.join("、"));
       const sub = ep.title
-        ? "《" + ep.title + "》" + (ep.host ? "・<span class='host'>" + ep.host + "</span>" : "・選書人未定")
+        ? "《" + ep.title + "》" + (parts.length ? "・" + parts.join("｜") : "")
         : "作品未定・待選題";
       label.innerHTML = fridayLabel(ep.air) + " 集<small>" + sub + "</small>";
       if(!ep.title){ label.style.opacity = .6; }
-      label.title = ep.note || "";
+      label.title = "《" + (ep.title||"未定") + "》" +
+        (spkPeople.length ? "｜講者：" + spkPeople.join("、") : "") +
+        (copyP.length ? "｜文案：" + copyP.join("、") : "") +
+        (editP.length ? "｜剪輯：" + editP.join("、") : "") +
+        (ep.note ? "｜" + ep.note : "");
       g.appendChild(label);
       const epName = fridayLabel(ep.air) + " 集" + (ep.title ? "《" + ep.title + "》" : "（作品未定）");
       STAGES.forEach(s=> addBar(row, s.key, ep.air + s.from, ep.air + s.to, epName, s.key==="topic" && !!ep.title));
@@ -448,7 +733,6 @@
       row++;
     });
 
-    // 墊檔集
     standbys.forEach(sb=>{
       const label = document.createElement("div");
       label.className = "eplabel";
@@ -467,10 +751,17 @@
         sb.stagesAbs = [{key:"stock", from:1, to:WEEKS}];
       }
       sb.stagesAbs.forEach(s=> addBar(row, s.key, s.from, s.to, "《" + sb.title + "》", false));
+      if(sb.recW && sb.recW >= 1 && sb.recW <= WEEKS){
+        const m = document.createElement("div");
+        m.className = "recdot";
+        m.style.gridRow = row;
+        m.style.gridColumn = colOf(sb.recW);
+        m.title = "《" + sb.title + "》｜錄音日 " + dateLabel(sb.recTs);
+        g.appendChild(m);
+      }
       row++;
     });
 
-    // 紅線
     nl = document.createElement("div");
     nl.className = "nowline";
     g.appendChild(nl);
@@ -478,16 +769,14 @@
     tag.className = "nowtag mono";
     g.appendChild(tag);
 
+    renderNextUp();
+    renderCrew();
     setNow(TODAY_WEEK);
   }
 
+  /* ── ⑤ 週次瀏覽切面 ── */
   const slice = document.getElementById("slice");
   const sliceTitle = document.getElementById("sliceTitle");
-
-  // 打勾狀態：存於此裝置的瀏覽器（每人各自追蹤）
-  const STORE_KEY = "gantt_todo_v1";
-  function loadTodos(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||"{}"); }catch(e){ return {}; } }
-  function saveTodos(o){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(o)); }catch(e){} }
 
   function updateProgress(){
     const boxes = slice.querySelectorAll("input[type=checkbox]");
@@ -498,111 +787,58 @@
 
   function renderSlice(){
     slice.innerHTML = "";
-    const todos = loadTodos();
-    const buckets = {};
-    ["topic","read","rec","edit","sched","stock"].forEach(k => buckets[k] = []);
-    const topicDone = [], airing = [], soloAiring = [];
+    const {todos, infos} = computeWeekItems(now);
+    const byKey = {};
+    todos.forEach(it => { (byKey[it.key] = byKey[it.key] || []).push(it); });
 
-    team.forEach(ep=>{
-      const name = ep.title ? "《" + ep.title + "》" : fridayLabel(ep.air) + " 集（作品未定）";
-      if(ep.air === now) airing.push(name + "（" + fridayLabel(ep.air) + "）");
-      STAGES.forEach(s=>{
-        if(now >= ep.air + s.from && now <= ep.air + s.to){
-          if(s.key === "topic"){
-            if(ep.title){ topicDone.push(name); }
-            else{
-              buckets.topic.push({base:name, warn:(now === ep.air + s.to) ? "⚠ 選題死線" : null});
-            }
-            return;
-          }
-          let warn = null;
-          if(s.key === "edit" && now === ep.air + s.to) warn = "⚠ 剪輯死線";
-          if(s.key === "rec"){
-            if(ep.recTs) return; // 已定錄音日：改由實際日期驅動（見下方）
-            if(now === ep.air + s.to) warn = "錄音完成死線";
-          }
-          buckets[s.key].push({base:name, warn:warn});
-        }
-      });
-      // 已定錄音日：在錄音日當週顯示待辦
-      if(ep.recTs && weekOf(ep.recTs) === now){
-        buckets.rec.push({base:name + "（錄音日 " + dateLabel(ep.recTs) + "）",
-          warn:(weekOf(ep.recTs) > ep.air - 4) ? "⚠ 晚於錄音死線" : null});
-      }
-    });
-    // 選題逾期：已過選題窗口仍未定題
-    const overdue = team.filter(ep => !ep.title && now > ep.air - 11 && now < ep.air)
-                        .map(ep => ({base:fridayLabel(ep.air) + " 集：定案作品", warn:"🚨 已逾期"}));
-    solos.forEach(e=>{ if(e.air === now) soloAiring.push("《" + e.title + "》"); });
-    standbys.forEach(sb=>{
-      (sb.stagesAbs||[]).forEach(s=>{
-        if(now >= s.from && now <= s.to && s.key !== "stock"){
-          buckets[s.key].push({base:"《" + sb.title + "》",
-            warn:(s.key === "edit" && now === s.to) ? "⚠ 剪輯死線" : null});
-        }
-        if(s.key === "stock" && now >= s.from && now <= s.to){
-          buckets.stock.push({base:"《" + sb.title + "》", warn:null, info:true});
-        }
-      });
-    });
-
-    // 建立含打勾框的卡片
-    const makeCard = (title, desc, colorVar, items, checkable) => {
+    const makeCard = (title, desc, colorVar, fill) => {
       const t = document.createElement("div");
       t.className = "task";
       t.style.borderLeftColor = getComputedStyle(document.documentElement)
         .getPropertyValue(colorVar).trim();
       t.innerHTML = "<b>" + title + "</b>" + (desc ? "<span>" + desc + "</span>" : "");
-      items.forEach(it=>{
-        if(!checkable || it.info){
-          const p = document.createElement("div");
-          p.className = "todo info";
-          p.innerHTML = "<span>" + it.base + "</span>";
-          t.appendChild(p);
-          return;
-        }
-        const id = "w" + now + "|" + title + "|" + it.base;
-        const lab = document.createElement("label");
-        lab.className = "todo" + (todos[id] ? " checked" : "");
-        lab.innerHTML = "<input type='checkbox'" + (todos[id] ? " checked" : "") + ">" +
-          "<span>" + it.base + (it.warn ? " <em class='dl'>〈" + it.warn + "〉</em>" : "") + "</span>";
-        lab.querySelector("input").addEventListener("change", ev=>{
-          if(ev.target.checked) todos[id] = 1; else delete todos[id];
-          saveTodos(todos);
-          lab.classList.toggle("checked", ev.target.checked);
-          updateProgress();
-        });
-        t.appendChild(lab);
-      });
+      fill(t);
       slice.appendChild(t);
     };
 
-    const ORDER = ["sched","edit","rec","read","topic","stock"];
     let any = false;
-    if(overdue.length){
+    const overdueItems = todos.filter(it => it.overdue);
+    if(overdueItems.length){
       any = true;
-      makeCard("🚨 選題逾期", "本週最優先：立刻定案，或改排輕量集／啟用墊檔", "--c-rec", overdue, true);
+      makeCard("🚨 選題逾期", "本週最優先：立刻定案，或改排輕量集／啟用墊檔", "--c-rec", t=>{
+        overdueItems.forEach(it => t.appendChild(makeTodoRow(now, it, true)));
+      });
     }
+    const ORDER = ["sched","copy","edit","rec","read","topic"];
     ORDER.forEach(key=>{
-      if(!buckets[key].length) return;
+      const items = (byKey[key]||[]).filter(it => !it.overdue);
+      if(!items.length) return;
       any = true;
-      makeCard(NAMEOF[key], GENERIC[key], "--c-"+key, buckets[key], key !== "stock");
+      makeCard(NAMEOF[key], GENERIC[key], STAGECOLOR[key], t=>{
+        items.forEach(it => t.appendChild(makeTodoRow(now, it, true)));
+      });
     });
-    if(topicDone.length){
+
+    const infoGroups = [
+      {g:"air",       title:"🎉 本週五播出", desc:"排程應已於上週完成", color:"--c-air"},
+      {g:"solo",      title:"◆ 個人節目播出", desc:fridayLabel(now) + " 週五上架", color:"--c-solo"},
+      {g:"topicDone", title:"✓ 選題窗口（作品已定）", desc:"已超前，無需動作", color:"--c-topic"},
+      {g:"stock",     title:"備用庫存", desc:"待命中，隨時可換上", color:"--c-stock"},
+    ];
+    infoGroups.forEach(grp=>{
+      const items = infos.filter(i => i.group === grp.g);
+      if(!items.length) return;
       any = true;
-      makeCard("✓ 選題窗口（作品已定）", "已超前，無需動作", "--c-topic",
-        topicDone.map(n=>({base:n, info:true})), false);
-    }
-    if(airing.length){
-      any = true;
-      makeCard("🎉 本週五播出", "排程應已於上週完成", "--c-air",
-        airing.map(n=>({base:n, info:true})), false);
-    }
-    if(soloAiring.length){
-      any = true;
-      makeCard("◆ 個人節目播出", fridayLabel(now) + " 週五上架", "--c-solo",
-        soloAiring.map(n=>({base:n, info:true})), false);
-    }
+      makeCard(grp.title, grp.desc, grp.color, t=>{
+        items.forEach(i=>{
+          const p = document.createElement("div");
+          p.className = "todo info";
+          p.innerHTML = "<span>" + i.base + "</span>";
+          t.appendChild(p);
+        });
+      });
+    });
+
     if(!any){
       const e = document.createElement("div");
       e.className = "empty";
@@ -610,6 +846,11 @@
       slice.appendChild(e);
     }
     updateProgress();
+  }
+
+  function refreshBoards(){
+    renderCrew();
+    renderSlice();
   }
 
   function setNow(w){
@@ -635,7 +876,7 @@
   async function load(){
     if(!SHEET_CSV_URL){
       banner.className = "banner show";
-      banner.innerHTML = "⚙️ 目前顯示的是<b>內建示範資料</b>。要連上 Google Sheet：在 Sheet 中「檔案 → 共用 → 發布到網路」，格式選 CSV，把網址貼進本檔案開頭的 <code>SHEET_CSV_URL</code>。";
+      banner.innerHTML = "⚙️ 目前顯示的是<b>內建示範資料</b>。請在檔案開頭的 <code>SHEET_CSV_URL</code> 填入 Google Sheet 發布的 CSV 網址。";
       build(toEntries(SAMPLE_CSV));
       return;
     }
