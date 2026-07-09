@@ -118,18 +118,23 @@
   .weeknav .cur{font-size:13px;font-weight:700;color:var(--now);min-width:110px;text-align:center}
   .scroll{overflow-x:auto;padding:20px 16px 18px}
 
-  .gantt{display:grid;grid-auto-rows:36px;row-gap:6px;position:relative}
+  .gantt{display:grid;grid-auto-rows:54px;row-gap:4px;position:relative}
   .wk{grid-row:1;align-self:center;justify-self:center;font-size:10px;color:var(--ink-dim);
     text-align:center;line-height:1.3;cursor:pointer;border-radius:6px;padding:2px 4px}
   .wk:hover{background:var(--panel-2)}
   .wk b{display:block;color:var(--ink);font-weight:600}
   .wk.active, .wk.active b{color:var(--now)}
-  .eplabel{grid-column:1;align-self:center;font-size:12px;font-weight:700;
+  .eplabel{grid-column:1;align-self:center;font-size:12.5px;font-weight:700;
     color:var(--ink);white-space:nowrap;padding-right:10px;overflow:hidden;
     text-overflow:ellipsis;line-height:1.35}
-  .eplabel small{display:block;font-weight:400;font-size:10px;color:var(--ink-dim);
-    overflow:hidden;text-overflow:ellipsis}
+  .eplabel small{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+    font-weight:400;font-size:10.5px;color:var(--ink-dim);
+    white-space:normal;overflow:hidden;text-overflow:ellipsis;line-height:1.45}
   .eplabel .host{color:var(--c-read);font-weight:600}
+  .eplabel .t-copy{color:var(--c-copy);font-weight:600}
+  .eplabel .t-edit{color:var(--c-edit);font-weight:600}
+  .eplabel .t-eb{color:var(--c-sched);font-weight:700}
+  .eplabel .t-paper{color:var(--c-edit);font-weight:700}
   .bar{align-self:center;height:16px;border-radius:4px;position:relative;opacity:.95;z-index:2}
   .bar.rec{height:20px;border-radius:5px;box-shadow:0 0 10px rgba(255,93,108,.45)}
   .bar.topic.done{opacity:.45}
@@ -149,8 +154,8 @@
     box-shadow:0 0 8px rgba(255,93,108,.5)}
   .recdot::after{content:"🎙"}
   .recdot.late{border-color:var(--c-edit);box-shadow:0 0 8px rgba(255,179,71,.5)}
-  .gridline{position:absolute;top:40px;bottom:0;width:1px;background:var(--line);opacity:.45;pointer-events:none}
-  .soloband{position:absolute;top:40px;bottom:0;background:rgba(91,98,140,.16);
+  .gridline{position:absolute;top:58px;bottom:0;width:1px;background:var(--line);opacity:.45;pointer-events:none}
+  .soloband{position:absolute;top:58px;bottom:0;background:rgba(91,98,140,.16);
     border-left:1px dashed var(--c-solo);border-right:1px dashed var(--c-solo);
     pointer-events:none;z-index:1}
   .soloband em{position:absolute;top:6px;left:50%;transform:translateX(-50%);
@@ -333,7 +338,7 @@
   };
   const STAGECOLOR = {topic:"--c-topic",read:"--c-read",rec:"--c-rec",copy:"--c-copy",edit:"--c-edit",sched:"--c-sched",stock:"--c-stock"};
 
-  const COL_W = 44, LABEL_W = 190;
+  const COL_W = 44, LABEL_W = 250;
   const DAY = 86400000;
   const g = document.getElementById("gantt");
   const banner = document.getElementById("banner");
@@ -715,11 +720,11 @@
       const parts = [];
       if(spkPeople.length) parts.push("講 <span class='host'>" + spkPeople.join("、") + "</span>");
       const copyP = matchPeople(ep.copy);
-      if(copyP.length) parts.push("文 " + copyP.join("、"));
+      if(copyP.length) parts.push("文 <span class='t-copy'>" + copyP.join("、") + "</span>");
       const editP = matchPeople(ep.edit);
-      if(editP.length) parts.push("剪 " + editP.join("、"));
+      if(editP.length) parts.push("剪 <span class='t-edit'>" + editP.join("、") + "</span>");
       const eb = ebookText(ep);
-      if(eb) parts.push(eb);
+      if(eb) parts.push("<span class='" + (ebookStatus(ep.ebook) === 1 ? "t-eb" : "t-paper") + "'>" + eb + "</span>");
       const sub = ep.title
         ? "《" + ep.title + "》" + (parts.length ? "・" + parts.join("｜") : "")
         : "作品未定・待選題";
