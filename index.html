@@ -185,6 +185,11 @@
   .who{display:inline-block;font-size:10px;font-weight:700;border-radius:999px;
     padding:1px 7px;margin-left:5px;vertical-align:1px;color:#0e1120}
   .who.un{background:transparent;border:1px dashed var(--c-rec);color:var(--c-rec)}
+  .ebook{display:inline-block;font-size:10px;font-weight:700;border-radius:4px;
+    padding:1px 6px;margin-left:5px;background:rgba(63,214,176,.15);
+    color:var(--c-sched);border:1px solid rgba(63,214,176,.4);vertical-align:1px}
+  .ebook.paper{background:rgba(255,179,71,.12);color:var(--c-edit);
+    border-color:rgba(255,179,71,.4)}
 
   .notes{max-width:1220px;margin:16px auto 0;font-size:12.5px;color:var(--ink-dim);line-height:1.9}
   .notes b{color:var(--ink)}
@@ -259,7 +264,7 @@
 
 <div class="notes">
   <b>Google Sheet 欄位格式（第一列為標題列，順序不限，可有多餘欄位）：</b><br>
-  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」）。③ <b>講者</b>：這集上場的人，可多人（例：梅、熊）；閱讀與錄音會指派給講者。找不到「講者」欄時退回讀「選書人」欄。④ <b>作品</b>：可留空＝已排檔期待選題，逾期會顯示 🚨。⑤ <b>錄音日期</b>：任何集數皆可填，會顯示 🎙 圓點且切面以實際日期為準；晚於播出前四週會警示。⑥ <b>文案</b>：撰寫文案的人。⑦ <b>剪輯</b>：剪輯的人。⑧ <b>排程</b>：可留空，預設阿植。⑨ <b>備註</b>：自由填寫。<br>
+  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」）。③ <b>講者</b>：這集上場的人，可多人（例：梅、熊）；閱讀與錄音會指派給講者。找不到「講者」欄時退回讀「選書人」欄。④ <b>作品</b>：可留空＝已排檔期待選題，逾期會顯示 🚨。⑤ <b>錄音日期</b>：任何集數皆可填，會顯示 🎙 圓點且切面以實際日期為準；晚於播出前四週會警示。⑥ <b>文案</b>：撰寫文案的人。⑦ <b>剪輯</b>：剪輯的人。⑧ <b>排程</b>：可留空，預設阿植。⑨ <b>電子書</b>：填「有」或平台名（如 BookWalker）→ 顯示 📖 標記；填「無」→ 顯示 ⚠ 僅實體提醒（閱讀期前記得先取得書）；留空＝未確認。⑩ <b>備註</b>：自由填寫。<br>
   <b>人名寫法</b>：全名或簡稱皆可辨識（大酸梅／酸梅／梅、阿植／植、趴趴熊／熊、布菇／菇），多人用頓號或逗號分隔。<br>
   <b>管線規則</b>：選題（前 13–11 週）→ 閱讀（前 11–5 週）→ 錄音完成（前 4 週）→ 文案剪輯完成（前 2 週）→ 排程完成（前 1 週）。
 </div>
@@ -353,6 +358,19 @@
     const n = new Date();
     return weekOf(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()));
   }
+  // 電子書狀態：1=有電子書, -1=僅實體, 0=未填
+  function ebookStatus(v){
+    const s = String(v||"").trim();
+    if(!s) return 0;
+    if(/^(無|否|沒有|x|X|no|No|N)$/.test(s)) return -1;
+    return 1;
+  }
+  function ebookText(ep){
+    const st = ebookStatus(ep.ebook);
+    if(st === 1) return "📖 電子書" + (/^(有|是|✓|v|V|yes|Yes|Y|o|O)$/.test(ep.ebook.trim()) ? "" : "（" + ep.ebook.trim() + "）");
+    if(st === -1) return "⚠ 僅實體";
+    return "";
+  }
 
   function parseCSV(text){
     const rows = [];
@@ -388,6 +406,7 @@
           iSpk = idx("講者"), iHost = idx("選書人"),
           iTitle = idx("作品"), iRec = idx("錄音日期"),
           iCopy = idx("文案"), iEdit = idx("剪輯"), iSch = idx("排程"),
+          iEbook = idx("電子書"),
           iNote = idx("備註");
     return rows.slice(1).map(r=>{
       const get = i => (i >= 0 && r[i] !== undefined) ? String(r[i]).trim() : "";
@@ -400,6 +419,7 @@
         copy:  get(iCopy),
         edit:  get(iEdit),
         sch:   get(iSch),
+        ebook: get(iEbook),
         note:  get(iNote),
       };
     }).filter(e => e.title || e.airTs);
@@ -428,8 +448,9 @@
           return;
         }
         if(s.key === "read"){
-          todos.push({key:"read", base:name,
-            warn:null, people:spkPeople.length ? spkPeople : ALLNAMES.slice()});
+          todos.push({key:"read", base:name, extra:ebookText(ep),
+            warn:(ebookStatus(ep.ebook) === -1) ? null : null,
+            people:spkPeople.length ? spkPeople : ALLNAMES.slice()});
           return;
         }
         if(s.key === "rec"){
@@ -506,6 +527,7 @@
     lab.className = "todo" + (ticks[id] ? " checked" : "");
     lab.innerHTML = "<input type='checkbox'" + (ticks[id] ? " checked" : "") + ">" +
       "<span class='txt'>" + it.base +
+      (it.extra ? " <span class='ebook" + (it.extra.indexOf("⚠") === 0 ? " paper" : "") + "'>" + it.extra + "</span>" : "") +
       (it.warn ? " <em class='dl'>〈" + it.warn + "〉</em>" : "") +
       (showWho ? whoChips(it) : "") + "</span>";
     lab.querySelector("input").addEventListener("change", ev=>{
@@ -696,6 +718,8 @@
       if(copyP.length) parts.push("文 " + copyP.join("、"));
       const editP = matchPeople(ep.edit);
       if(editP.length) parts.push("剪 " + editP.join("、"));
+      const eb = ebookText(ep);
+      if(eb) parts.push(eb);
       const sub = ep.title
         ? "《" + ep.title + "》" + (parts.length ? "・" + parts.join("｜") : "")
         : "作品未定・待選題";
@@ -705,6 +729,7 @@
         (spkPeople.length ? "｜講者：" + spkPeople.join("、") : "") +
         (copyP.length ? "｜文案：" + copyP.join("、") : "") +
         (editP.length ? "｜剪輯：" + editP.join("、") : "") +
+        (eb ? "｜" + eb : "") +
         (ep.note ? "｜" + ep.note : "");
       g.appendChild(label);
       const epName = fridayLabel(ep.air) + " 集" + (ep.title ? "《" + ep.title + "》" : "（作品未定）");
