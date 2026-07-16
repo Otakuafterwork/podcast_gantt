@@ -55,6 +55,12 @@
   .banner.show{display:block}
   .banner code{background:rgba(255,179,71,.15);padding:1px 6px;border-radius:4px;
     font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+  .alertbox{max-width:1220px;margin:0 auto 12px;border:1px solid var(--c-rec);
+    background:rgba(255,93,108,.1);color:var(--ink);border-radius:10px;
+    padding:12px 14px;font-size:12.5px;display:none;line-height:1.8}
+  .alertbox.show{display:block;box-shadow:0 0 16px rgba(255,93,108,.25)}
+  .alertbox > b{color:var(--c-rec);display:block;margin-bottom:4px}
+  .alertbox .aitem b{color:var(--c-rec)}
 
   /* ── 接下來播出 ── */
   .nextup{max-width:1220px;margin:0 auto 14px;background:linear-gradient(135deg,#1d2240,#181c2e);
@@ -133,6 +139,7 @@
   .eplabel .host{color:var(--c-read);font-weight:600}
   .eplabel .t-copy{color:var(--c-copy);font-weight:600}
   .eplabel .t-edit{color:var(--c-edit);font-weight:600}
+  .eplabel .t-sched{color:var(--c-sched);font-weight:600}
   .eplabel .t-eb{color:var(--c-sched);font-weight:700}
   .eplabel .t-paper{color:var(--c-edit);font-weight:700}
   .bar{align-self:center;height:16px;border-radius:4px;position:relative;opacity:.95;z-index:2}
@@ -211,6 +218,9 @@
 
 <div class="banner" id="banner"></div>
 
+<!-- 🚨 逾期警戒 -->
+<div class="alertbox" id="alertbox"></div>
+
 <!-- ① 接下來播出 -->
 <div class="nextup" id="nextup"></div>
 
@@ -220,12 +230,19 @@
   <div class="crew" id="crew"></div>
 </div>
 
+<!-- ⑤ 週次瀏覽切面 -->
+<div class="slice">
+  <h2 id="sliceTitle"></h2>
+  <p class="sub">紅線那一週的待辦清單 —— 勾選追蹤進度（勾勾存在你自己的裝置上）。 <span id="progress" class="mono" style="color:var(--c-sched);font-weight:700"></span></p>
+  <div class="slice-grid" id="slice"></div>
+</div>
+
 <!-- ③ 職責範圍 -->
 <div class="respsec">
   <h2>👥 職責範圍</h2>
   <div class="resp">
     <div><span class="pd" style="background:var(--p-bugu)"></span><span><b>布菇</b>｜時間軸監督——所有 🚨 逾期、⚠ 死線、未指派項目自動歸入她的看板追蹤</span></div>
-    <div><span class="pd" style="background:var(--p-azhi)"></span><span><b>阿植</b>｜全部排程上架（排程欄留空即預設指派給她）</span></div>
+    <div><span class="pd" style="background:var(--p-azhi)"></span><span><b>阿植</b>｜排程上架（依 Sheet 排程欄指派給任何人；留空預設阿植）</span></div>
     <div><span class="pd" style="background:var(--p-mei)"></span><span><b>大酸梅</b>｜參與的文案與剪輯（依 Sheet 文案／剪輯欄指派）＋擔任講者的集數閱讀與錄音</span></div>
     <div><span class="pd" style="background:var(--p-papa)"></span><span><b>趴趴熊</b>｜參與的文案與剪輯（依 Sheet 文案／剪輯欄指派）＋擔任講者的集數閱讀與錄音</span></div>
   </div>
@@ -260,16 +277,10 @@
   </div>
 </div>
 
-<!-- ⑤ 週次瀏覽切面 -->
-<div class="slice">
-  <h2 id="sliceTitle"></h2>
-  <p class="sub">紅線那一週的待辦清單 —— 勾選追蹤進度（勾勾存在你自己的裝置上）。 <span id="progress" class="mono" style="color:var(--c-sched);font-weight:700"></span></p>
-  <div class="slice-grid" id="slice"></div>
-</div>
 
 <div class="notes">
   <b>Google Sheet 欄位格式（第一列為標題列，順序不限，可有多餘欄位）：</b><br>
-  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」）。③ <b>講者</b>：這集上場的人，可多人（例：梅、熊）；閱讀與錄音會指派給講者。找不到「講者」欄時退回讀「選書人」欄。④ <b>作品</b>：可留空＝已排檔期待選題，逾期會顯示 🚨。⑤ <b>錄音日期</b>：任何集數皆可填，會顯示 🎙 圓點且切面以實際日期為準；晚於播出前四週會警示。⑥ <b>文案</b>：撰寫文案的人。⑦ <b>剪輯</b>：剪輯的人。⑧ <b>排程</b>：可留空，預設阿植。⑨ <b>電子書</b>：填「有」或平台名（如 BookWalker）→ 顯示 📖 標記；填「無」→ 顯示 ⚠ 僅實體提醒（閱讀期前記得先取得書）；留空＝未確認。⑩ <b>備註</b>：自由填寫。<br>
+  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」）。③ <b>講者</b>：這集上場的人，可多人（例：梅、熊）；閱讀與錄音會指派給講者。找不到「講者」欄時退回讀「選書人」欄。④ <b>作品</b>：可留空＝已排檔期待選題，逾期會顯示 🚨。⑤ <b>錄音日期</b>：任何集數皆可填，會顯示 🎙 圓點且切面以實際日期為準；晚於播出前四週會警示。⑥ <b>文案</b>：撰寫文案的人。⑦ <b>剪輯</b>：剪輯的人。⑧ <b>排程</b>：可留空，預設阿植。⑨ <b>電子書</b>：填「有」或平台名（如 BookWalker）→ 顯示 📖 標記；填「無」→ 顯示 ⚠ 僅實體提醒（閱讀期前記得先取得書）；留空＝未確認。⑩ <b>完成追蹤欄</b>：錄音安排完成日期（死線＝播出前 11 週；已填錄音日期欄視同完成）、錄音完成（前 4 週）、文案完成日期／剪輯完成日期（前 2 週）、排程完成日期（前 1 週）——填日期或任何文字（如 V）皆算完成；<b>留空且超過死線會在頁面最上方顯示 🚨 紅色警戒</b>，已播出的集數不再警示。⑪ <b>備註</b>：自由填寫。<br>
   <b>人名寫法</b>：全名或簡稱皆可辨識（大酸梅／酸梅／梅、阿植／植、趴趴熊／熊、布菇／菇），多人用頓號或逗號分隔。<br>
   <b>管線規則</b>：選題（前 13–11 週）→ 閱讀（前 11–5 週）→ 錄音完成（前 4 週）→ 文案剪輯完成（前 2 週）→ 排程完成（前 1 週）。
 </div>
@@ -363,6 +374,10 @@
     const n = new Date();
     return weekOf(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()));
   }
+  function todayTs(){
+    const n = new Date();
+    return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate());
+  }
   // 電子書狀態：1=有電子書, -1=僅實體, 0=未填
   function ebookStatus(v){
     const s = String(v||"").trim();
@@ -406,13 +421,28 @@
     const rows = parseCSV(csvText);
     if(rows.length < 2) return [];
     const head = rows[0].map(h => h.trim());
-    const idx = name => head.findIndex(h => h.includes(name));
-    const iDate = idx("播出日期"), iType = idx("類型"),
-          iSpk = idx("講者"), iHost = idx("選書人"),
-          iTitle = idx("作品"), iRec = idx("錄音日期"),
-          iCopy = idx("文案"), iEdit = idx("剪輯"), iSch = idx("排程"),
-          iEbook = idx("電子書"),
-          iNote = idx("備註");
+    // 先精準比對，再模糊比對；指派欄排除含「完成」的標題以免誤抓完成欄
+    const findCol = (...names) => {
+      for(const n of names){ const i = head.findIndex(h => h === n); if(i >= 0) return i; }
+      for(const n of names){ const i = head.findIndex(h => h.includes(n)); if(i >= 0) return i; }
+      return -1;
+    };
+    const findAssign = name => {
+      let i = head.findIndex(h => h === name);
+      if(i >= 0) return i;
+      return head.findIndex(h => h.includes(name) && !h.includes("完成"));
+    };
+    const iDate = findCol("播出日期"), iType = findCol("類型"),
+          iSpk = findAssign("講者"), iHost = findAssign("選書人"),
+          iTitle = findCol("作品"), iRec = findAssign("錄音日期"),
+          iCopy = findAssign("文案"), iEdit = findAssign("剪輯"), iSch = findAssign("排程"),
+          iEbook = findCol("電子書"),
+          iRecArr = findCol("錄音安排完成日期","錄音安排"),
+          iRecDone = findCol("錄音完成日期","錄音完成"),
+          iCopyDone = findCol("文案完成日期","文案完成"),
+          iEditDone = findCol("剪輯完成日期","剪輯完成"),
+          iSchedDone = findCol("排程完成日期","排程完成"),
+          iNote = findCol("備註");
     return rows.slice(1).map(r=>{
       const get = i => (i >= 0 && r[i] !== undefined) ? String(r[i]).trim() : "";
       return {
@@ -425,12 +455,17 @@
         edit:  get(iEdit),
         sch:   get(iSch),
         ebook: get(iEbook),
+        recArr:    get(iRecArr),
+        recDone:   get(iRecDone),
+        copyDone:  get(iCopyDone),
+        editDone:  get(iEditDone),
+        schedDone: get(iSchedDone),
         note:  get(iNote),
       };
     }).filter(e => e.title || e.airTs);
   }
 
-  let WEEKS = 24, TODAY_WEEK = 1, now = 1;
+  let WEEKS = 24, TODAY_WEEK = 1, VIEW_FROM = 1, now = 1;
   let team = [], solos = [], standbys = [];
   let nl, tag, wkEls = [];
 
@@ -544,23 +579,59 @@
     return lab;
   }
 
-  /* ── ① 接下來播出 ── */
+  /* ── 🚨 頂端紅色警戒：完成欄位逾期未填 ── */
+  const CHECKS = [
+    {field:"recArr",    label:"錄音安排", offWeeks:11},
+    {field:"recDone",   label:"錄音完成", offWeeks:4},
+    {field:"copyDone",  label:"文案完成", offWeeks:2},
+    {field:"editDone",  label:"剪輯完成", offWeeks:2},
+    {field:"schedDone", label:"排程完成", offWeeks:1},
+  ];
+  function renderAlerts(){
+    const box = document.getElementById("alertbox");
+    const nowT = todayTs();
+    const items = [];
+    team.forEach(ep=>{
+      if(!ep.airTs || ep.airTs < nowT) return; // 已播出的不再警示
+      CHECKS.forEach(c=>{
+        let done = String(ep[c.field]||"").trim() !== "";
+        if(c.field === "recArr" && ep.recTs) done = true; // 已填錄音日期＝已安排
+        if(done) return;
+        const deadline = ep.airTs - c.offWeeks*7*DAY;
+        if(nowT > deadline){
+          const daysOver = Math.round((nowT - deadline)/DAY);
+          items.push({ep, c, deadline, daysOver});
+        }
+      });
+    });
+    if(!items.length){ box.className = "alertbox"; box.innerHTML = ""; return; }
+    box.className = "alertbox show";
+    box.innerHTML = "<b>🚨 逾期未完成（" + items.length + " 項）——布菇請追蹤：</b>" +
+      items.map(it =>
+        "<div class='aitem'>《" + (it.ep.title || fridayLabel(it.ep.air) + " 集・作品未定") + "》" +
+        "<b>" + it.c.label + "</b>未填——死線 " + dateLabel(it.deadline) +
+        "，已超過 <b>" + it.daysOver + "</b> 天（" + fridayLabel(it.ep.air) + " 播出）</div>"
+      ).join("");
+  }
+
+  /* ── ① 接下來播出（以真實日期判斷：週五過後自動顯示下一集）── */
   function renderNextUp(){
     const el = document.getElementById("nextup");
+    const nowT = todayTs();
     const upcoming = [
       ...team.map(e=>({...e, kind:"team"})),
       ...solos.map(e=>({...e, kind:"solo"}))
-    ].filter(e => e.air >= TODAY_WEEK).sort((a,b)=> a.air - b.air);
+    ].filter(e => e.airTs && e.airTs >= nowT).sort((a,b)=> a.airTs - b.airTs);
     if(!upcoming.length){ el.innerHTML = "<div class='big'><div class='title'>目前沒有已排定的播出</div></div>"; return; }
     const next = upcoming[0];
-    const later = upcoming.filter(e => e.air > next.air).slice(0,2);
+    const later = upcoming.filter(e => e.airTs > next.airTs).slice(0,2);
     const spk = matchPeople(next.spk);
-    const wksAway = next.air - TODAY_WEEK;
-    const cd = wksAway === 0 ? "本週五" : wksAway === 1 ? "下週五" : wksAway + " 週後";
+    const days = Math.round((next.airTs - nowT)/DAY);
+    const cd = days === 0 ? "今天播出！" : days === 1 ? "明天" : days + " 天後";
     el.innerHTML =
       "<div class='big'>" +
         "<div class='kicker'>▶ 接下來播出 NEXT UP</div>" +
-        "<div class='title'>" + fridayLabel(next.air) + "（五）《" + (next.title||"作品未定") + "》" +
+        "<div class='title'>" + dateLabel(next.airTs) + "《" + (next.title||"作品未定") + "》" +
           (next.kind==="solo" ? "・個人節目" : "") + "</div>" +
         "<div class='meta'>" + (spk.length ? "講者：" + spk.join("、") : "講者未定") +
           (next.note ? "｜" + next.note : "") + "</div>" +
@@ -643,17 +714,19 @@
     standbys.forEach(e => { if(e.recW) maxW = Math.max(maxW, e.recW + 6); });
     WEEKS = maxW + 3;
     TODAY_WEEK = Math.min(WEEKS, Math.max(1, todayWeek()));
+    VIEW_FROM = TODAY_WEEK; // 已過的週次不再顯示
 
     g.innerHTML = "";
     wkEls = [];
-    g.style.gridTemplateColumns = LABEL_W + "px repeat(" + WEEKS + ", " + COL_W + "px)";
-    g.style.minWidth = (LABEL_W + WEEKS*COL_W + 20) + "px";
-    const colOf = w => w + 1;
+    const nCols = WEEKS - VIEW_FROM + 1;
+    g.style.gridTemplateColumns = LABEL_W + "px repeat(" + nCols + ", " + COL_W + "px)";
+    g.style.minWidth = (LABEL_W + nCols*COL_W + 20) + "px";
+    const colOf = w => w - VIEW_FROM + 2;
 
     document.getElementById("rangeTitle").textContent =
-      fridayLabel(1) + " → " + fridayLabel(WEEKS) + "，共 " + WEEKS + " 週";
+      fridayLabel(VIEW_FROM) + " → " + fridayLabel(WEEKS) + "，共 " + nCols + " 週（已過週次自動隱藏）";
 
-    for(let w=1; w<=WEEKS; w++){
+    for(let w=VIEW_FROM; w<=WEEKS; w++){
       const el = document.createElement("div");
       el.className = "wk mono";
       el.style.gridColumn = colOf(w);
@@ -663,20 +736,21 @@
       g.appendChild(el);
       wkEls.push(el);
     }
-    for(let w=2; w<=WEEKS; w++){
+    for(let w=VIEW_FROM+1; w<=WEEKS; w++){
       const gl = document.createElement("div");
       gl.className = "gridline";
-      gl.style.left = (LABEL_W + (w-1)*COL_W) + "px";
+      gl.style.left = (LABEL_W + (w-VIEW_FROM)*COL_W) + "px";
       g.appendChild(gl);
     }
 
     let row = 2;
 
-    if(solos.length){
-      const minW = solos[0].air, maxWs = solos[solos.length-1].air;
+    const visSolos = solos.filter(e => e.air >= VIEW_FROM && e.air <= WEEKS);
+    if(visSolos.length){
+      const minW = visSolos[0].air, maxWs = visSolos[visSolos.length-1].air;
       const band = document.createElement("div");
       band.className = "soloband";
-      band.style.left = (LABEL_W + (minW-1)*COL_W) + "px";
+      band.style.left = (LABEL_W + (minW-VIEW_FROM)*COL_W) + "px";
       band.style.width = ((maxWs - minW + 1)*COL_W) + "px";
       band.innerHTML = "<em>個人節目 " + fridayLabel(minW) + "–" + fridayLabel(maxWs) + "</em>";
       g.appendChild(band);
@@ -685,10 +759,9 @@
       label.className = "eplabel";
       label.style.gridRow = row;
       label.style.color = "var(--c-solo)";
-      label.innerHTML = "個人節目<small>共 " + solos.length + " 集</small>";
+      label.innerHTML = "個人節目<small>共 " + visSolos.length + " 集</small>";
       g.appendChild(label);
-      solos.forEach(e=>{
-        if(e.air < 1 || e.air > WEEKS) return;
+      visSolos.forEach(e=>{
         const d = document.createElement("div");
         d.className = "air solo";
         d.style.gridRow = row;
@@ -700,8 +773,8 @@
     }
 
     const addBar = (r, key, from, to, tip, done) => {
-      const f = Math.max(1, from), t = Math.min(WEEKS, to);
-      if(to < 1 || f > WEEKS || f > t) return;
+      const f = Math.max(VIEW_FROM, from), t = Math.min(WEEKS, to);
+      if(to < VIEW_FROM || f > WEEKS || f > t) return;
       const bar = document.createElement("div");
       bar.className = "bar " + key + (key==="rec" ? " rec" : "") + (done ? " done" : "");
       bar.style.gridRow = r;
@@ -713,6 +786,7 @@
     };
 
     team.forEach(ep=>{
+      if(ep.air < VIEW_FROM) return; // 已播出的集數不再顯示
       const label = document.createElement("div");
       label.className = "eplabel";
       label.style.gridRow = row;
@@ -723,6 +797,8 @@
       if(copyP.length) parts.push("文 <span class='t-copy'>" + copyP.join("、") + "</span>");
       const editP = matchPeople(ep.edit);
       if(editP.length) parts.push("剪 <span class='t-edit'>" + editP.join("、") + "</span>");
+      const schP = matchPeople(ep.sch);
+      if(schP.length) parts.push("程 <span class='t-sched'>" + schP.join("、") + "</span>");
       const eb = ebookText(ep);
       if(eb) parts.push("<span class='" + (ebookStatus(ep.ebook) === 1 ? "t-eb" : "t-paper") + "'>" + eb + "</span>");
       const sub = ep.title
@@ -734,12 +810,13 @@
         (spkPeople.length ? "｜講者：" + spkPeople.join("、") : "") +
         (copyP.length ? "｜文案：" + copyP.join("、") : "") +
         (editP.length ? "｜剪輯：" + editP.join("、") : "") +
+        (schP.length ? "｜排程：" + schP.join("、") : "") +
         (eb ? "｜" + eb : "") +
         (ep.note ? "｜" + ep.note : "");
       g.appendChild(label);
       const epName = fridayLabel(ep.air) + " 集" + (ep.title ? "《" + ep.title + "》" : "（作品未定）");
       STAGES.forEach(s=> addBar(row, s.key, ep.air + s.from, ep.air + s.to, epName, s.key==="topic" && !!ep.title));
-      if(ep.air >= 1 && ep.air <= WEEKS){
+      if(ep.air >= VIEW_FROM && ep.air <= WEEKS){
         const d = document.createElement("div");
         d.className = "air";
         d.style.gridRow = row;
@@ -749,7 +826,7 @@
       }
       if(ep.recTs){
         const rw = weekOf(ep.recTs);
-        if(rw >= 1 && rw <= WEEKS){
+        if(rw >= VIEW_FROM && rw <= WEEKS){
           const late = rw > ep.air - 4;
           const m = document.createElement("div");
           m.className = "recdot" + (late ? " late" : "");
@@ -781,7 +858,7 @@
         sb.stagesAbs = [{key:"stock", from:1, to:WEEKS}];
       }
       sb.stagesAbs.forEach(s=> addBar(row, s.key, s.from, s.to, "《" + sb.title + "》", false));
-      if(sb.recW && sb.recW >= 1 && sb.recW <= WEEKS){
+      if(sb.recW && sb.recW >= VIEW_FROM && sb.recW <= WEEKS){
         const m = document.createElement("div");
         m.className = "recdot";
         m.style.gridRow = row;
@@ -800,9 +877,18 @@
     g.appendChild(tag);
 
     renderNextUp();
+    renderAlerts();
     renderCrew();
     setNow(TODAY_WEEK);
   }
+
+  // 每小時重新以當下真實日期檢測（跨日、跨週五自動更新）
+  setInterval(()=>{
+    TODAY_WEEK = Math.min(WEEKS, Math.max(1, todayWeek()));
+    renderNextUp();
+    renderAlerts();
+    renderCrew();
+  }, 60*60*1000);
 
   /* ── ⑤ 週次瀏覽切面 ── */
   const slice = document.getElementById("slice");
@@ -884,16 +970,16 @@
   }
 
   function setNow(w){
-    now = Math.min(WEEKS, Math.max(1, w));
-    const x = LABEL_W + (now-1)*COL_W + COL_W/2;
+    now = Math.min(WEEKS, Math.max(VIEW_FROM, w));
+    const x = LABEL_W + (now-VIEW_FROM)*COL_W + COL_W/2;
     nl.style.left = x + "px";
     tag.style.left = x + "px";
     tag.textContent = (now === TODAY_WEEK ? "本週 " : "週五 ") + fridayLabel(now);
-    wkEls.forEach((el,i)=> el.classList.toggle("active", i === now-1));
+    wkEls.forEach((el,i)=> el.classList.toggle("active", VIEW_FROM + i === now));
     sliceTitle.textContent = "🔴 切面：週五 " + fridayLabel(now) + " 那一週" +
       (now === TODAY_WEEK ? "（本週）" : now === TODAY_WEEK+1 ? "（下週）" : "");
     document.getElementById("curLabel").textContent = "W" + now + " · " + fridayLabel(now);
-    document.getElementById("prevBtn").disabled = (now === 1);
+    document.getElementById("prevBtn").disabled = (now === VIEW_FROM);
     document.getElementById("nextBtn").disabled = (now === WEEKS);
     renderSlice();
   }
