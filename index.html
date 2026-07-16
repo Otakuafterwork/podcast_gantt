@@ -6,26 +6,28 @@
 <title>宅宅下班中｜節目製作看板</title>
 <style>
   :root{
-    --bg:#101320;
-    --panel:#181c2e;
-    --panel-2:#1f2440;
-    --line:#2b3152;
-    --ink:#e8eaf6;
-    --ink-dim:#9aa1c7;
-    --c-topic:#8b7ff5;
-    --c-read:#4da3ff;
-    --c-rec:#ff5d6c;
-    --c-copy:#f2d16b;
-    --c-edit:#ffb347;
-    --c-sched:#3fd6b0;
-    --c-air:#f5f0e6;
-    --c-solo:#5b628c;
-    --c-stock:#d4b968;
-    --now:#ff5d6c;
-    --p-bugu:#8b7ff5;
-    --p-azhi:#3fd6b0;
-    --p-mei:#4da3ff;
-    --p-papa:#ffb347;
+    --bg:#FFF6D8;
+    --panel:#FFFFFF;
+    --panel-2:#FFF1BE;
+    --line:#2B2B2B;
+    --soft:#E8DCB4;
+    --ink:#2B2B2B;
+    --ink-dim:#8A8064;
+    --brand:#FFD84D;
+    --c-topic:#7C5CD6;
+    --c-read:#2F7FD6;
+    --c-rec:#E5484D;
+    --c-copy:#C99700;
+    --c-edit:#F08C00;
+    --c-sched:#1E9E6F;
+    --c-air:#FFD84D;
+    --c-solo:#9AA3B2;
+    --c-stock:#C9A227;
+    --now:#E5484D;
+    --p-bugu:#7C5CD6;
+    --p-azhi:#1E9E6F;
+    --p-mei:#2F7FD6;
+    --p-papa:#F08C00;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -33,157 +35,192 @@
     font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
     padding:20px 16px 48px;
   }
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.13;
+    background:url('book.png') no-repeat left -50px bottom -60px / 260px,
+               url('cd.png') no-repeat right -60px top 140px / 230px,
+               url('pad.png') no-repeat right 40px bottom -70px / 220px}
   .mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
-  .wrap{max-width:1220px;margin:0 auto}
-  header{max-width:1220px;margin:0 auto 16px}
+  header{max-width:1220px;margin:0 auto 16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .brandlogo{height:118px;width:auto;flex:none}
   .eyebrow{
     display:inline-flex;align-items:center;gap:8px;
-    font-size:11px;letter-spacing:.22em;color:var(--c-rec);
-    border:1px solid var(--c-rec);border-radius:999px;
-    padding:4px 12px;margin-bottom:12px;
+    font-size:11px;letter-spacing:.22em;color:var(--c-rec);font-weight:700;
+    border:2px solid var(--line);background:#fff;border-radius:999px;
+    padding:4px 12px;margin-bottom:10px;
   }
-  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c-rec);
+  .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c-rec);
     animation:blink 1.6s ease-in-out infinite}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
   @media (prefers-reduced-motion:reduce){.eyebrow::before{animation:none}}
-  h1{font-size:clamp(20px,4vw,30px);font-weight:800;letter-spacing:.02em}
-  h1 small{display:block;font-size:13px;font-weight:400;color:var(--ink-dim);margin-top:6px;letter-spacing:.08em}
+  h1{font-size:clamp(20px,4vw,30px);font-weight:900;letter-spacing:.02em}
+  h1 small{display:block;font-size:12.5px;font-weight:400;color:var(--ink-dim);margin-top:6px;letter-spacing:.06em}
+  .alertbadge{margin-left:auto;display:none;background:var(--c-rec);color:#fff;font-weight:800;
+    font-size:13px;border:2px solid var(--line);border-radius:999px;padding:9px 16px;
+    text-decoration:none;box-shadow:3px 3px 0 rgba(43,43,43,.25)}
+  .alertbadge.show{display:inline-block}
 
-  .banner{max-width:1220px;margin:0 auto 12px;border:1px solid var(--c-edit);
-    background:rgba(255,179,71,.08);color:var(--c-edit);border-radius:10px;
+  .banner{max-width:1220px;margin:0 auto 12px;border:2px solid var(--c-edit);
+    background:#FFF3DC;color:#8a5a00;border-radius:12px;
     padding:10px 14px;font-size:12.5px;display:none;line-height:1.7}
   .banner.show{display:block}
-  .banner code{background:rgba(255,179,71,.15);padding:1px 6px;border-radius:4px;
+  .banner code{background:rgba(240,140,0,.14);padding:1px 6px;border-radius:4px;
     font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
-  .alertbox{max-width:1220px;margin:0 auto 12px;border:1px solid var(--c-rec);
-    background:rgba(255,93,108,.1);color:var(--ink);border-radius:10px;
-    padding:12px 14px;font-size:12.5px;display:none;line-height:1.8}
-  .alertbox.show{display:block;box-shadow:0 0 16px rgba(255,93,108,.25)}
-  .alertbox > b{color:var(--c-rec);display:block;margin-bottom:4px}
+
+  /* ── 未準時完成（頁面最底）── */
+  .alertbox{max-width:1220px;margin:18px auto 0;border:2px solid var(--c-rec);
+    background:#FFECEC;color:var(--ink);border-radius:14px;
+    padding:14px 16px;font-size:12.5px;display:none;line-height:1.9;
+    box-shadow:4px 4px 0 rgba(229,72,77,.2)}
+  .alertbox.show{display:block}
+  .alertbox > b{color:var(--c-rec);display:block;margin-bottom:6px;font-size:14px}
   .alertbox .aitem b{color:var(--c-rec)}
+  .alertbox.past{border-color:#9AA3B2;background:#F3F1E7;box-shadow:none;color:#6b6146}
+  .alertbox.past > b{color:#6b6146}
+  .alertbox.past .aitem b{color:#8a5a5a}
+  .donedate{color:var(--c-sched);font-weight:800;font-size:10.5px;margin-left:5px;white-space:nowrap}
+  .todo.donefix{cursor:default}
+  .todo.donefix input{cursor:default}
 
   /* ── 接下來播出 ── */
-  .nextup{max-width:1220px;margin:0 auto 14px;background:linear-gradient(135deg,#1d2240,#181c2e);
-    border:1px solid var(--line);border-radius:14px;padding:18px 20px;
-    display:flex;flex-wrap:wrap;align-items:center;gap:14px}
-  .nextup .big{flex:1;min-width:240px}
-  .nextup .kicker{font-size:11px;letter-spacing:.2em;color:var(--c-sched);font-weight:700;margin-bottom:6px}
-  .nextup .title{font-size:clamp(17px,3vw,23px);font-weight:800;line-height:1.4}
-  .nextup .meta{font-size:12.5px;color:var(--ink-dim);margin-top:6px}
-  .nextup .after{font-size:12px;color:var(--ink-dim);border-left:1px solid var(--line);
-    padding-left:14px;line-height:1.9;min-width:180px}
+  .nextup{max-width:1220px;margin:0 auto 14px;background:var(--brand);
+    border:2px solid var(--line);border-radius:16px;padding:20px 22px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:14px;
+    position:relative;overflow:hidden;box-shadow:5px 5px 0 rgba(43,43,43,.18)}
+  .nextup::after{content:"";position:absolute;right:2px;bottom:-18px;width:150px;height:150px;
+    background:url('zhai.png') no-repeat center/contain;pointer-events:none}
+  .nextup .big{flex:1;min-width:240px;position:relative;z-index:1}
+  @media (min-width:640px){ .nextup .big{padding-right:130px} }
+  @media (max-width:639px){ .nextup::after{opacity:.25} }
+  .nextup .kicker{font-size:11px;letter-spacing:.2em;color:var(--ink);font-weight:800;margin-bottom:6px}
+  .nextup .title{font-size:clamp(17px,3vw,24px);font-weight:900;line-height:1.4}
+  .nextup .meta{font-size:12.5px;color:#5c5230;margin-top:6px;font-weight:600}
+  .nextup .after{font-size:12px;color:#5c5230;border-left:2px solid rgba(43,43,43,.35);
+    padding-left:14px;line-height:1.9;min-width:180px;position:relative;z-index:1}
   .nextup .after b{color:var(--ink)}
-  .countdown{background:var(--c-sched);color:#0c2620;font-weight:800;font-size:13px;
-    padding:6px 14px;border-radius:999px;white-space:nowrap}
+  .countdown{background:#fff;color:var(--c-rec);font-weight:900;font-size:16px;
+    padding:10px 18px;border-radius:12px;white-space:nowrap;border:2px solid var(--line);
+    box-shadow:3px 3px 0 rgba(43,43,43,.2);position:relative;z-index:1;letter-spacing:.04em}
+  .countdown small{display:block;font-size:10px;color:var(--ink-dim);font-weight:700;letter-spacing:.1em}
 
   /* ── 四人看板 ── */
   .crewsec{max-width:1220px;margin:0 auto 14px}
-  .crewsec h2{font-size:16px;font-weight:800;margin-bottom:10px}
+  .crewsec h2{font-size:17px;font-weight:900;margin-bottom:10px;display:flex;align-items:center}
+  .crewsec h2::before{content:"";display:inline-block;width:32px;height:32px;flex:none;
+    background:url('pad.png') center/contain no-repeat;margin-right:8px}
   .crewsec h2 span{font-size:12px;color:var(--ink-dim);font-weight:400;margin-left:8px}
-  .crew{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
-  .person{background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:14px;border-top:3px solid var(--line)}
-  .person h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
-  .person h3 .pd{width:11px;height:11px;border-radius:50%;flex:none}
+  .crew{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+  .person{background:var(--panel);border:2px solid var(--line);border-radius:14px;
+    padding:14px;border-top-width:6px;box-shadow:4px 4px 0 rgba(43,43,43,.12)}
+  .person h3{font-size:15px;font-weight:900;display:flex;align-items:center;gap:8px}
+  .person h3 .pd{width:12px;height:12px;border-radius:50%;flex:none;border:2px solid var(--line)}
   .person .role{font-size:11px;color:var(--ink-dim);margin:4px 0 10px;line-height:1.6}
   .person .none{font-size:12.5px;color:var(--ink-dim);padding:4px 0}
-  .stagechip{display:inline-block;font-size:10px;font-weight:700;border-radius:4px;
-    padding:1px 6px;margin-right:6px;color:#0e1120;vertical-align:1px}
-  .sup{font-size:11px;color:var(--ink-dim);margin-top:10px;padding-top:8px;
-    border-top:1px dashed var(--line);letter-spacing:.08em;font-weight:700}
+  .stagechip{display:inline-block;font-size:10px;font-weight:800;border-radius:4px;
+    padding:1px 6px;margin-right:6px;color:#fff;vertical-align:1px}
+  .sup{font-size:11px;color:var(--c-rec);margin-top:10px;padding-top:8px;
+    border-top:2px dashed var(--soft);letter-spacing:.08em;font-weight:800}
 
   /* ── 職責範圍 ── */
   .respsec{max-width:1220px;margin:0 auto 14px;background:var(--panel-2);
-    border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-  .respsec h2{font-size:14px;font-weight:800;margin-bottom:8px}
+    border:2px solid var(--line);border-radius:14px;padding:14px 16px;
+    box-shadow:4px 4px 0 rgba(43,43,43,.1)}
+  .respsec h2{font-size:14px;font-weight:900;margin-bottom:8px}
   .resp{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;font-size:12px}
-  .resp div{display:flex;gap:8px;align-items:flex-start;color:var(--ink-dim);line-height:1.6}
-  .resp .pd{width:10px;height:10px;border-radius:50%;flex:none;margin-top:4px}
+  .resp div{display:flex;gap:8px;align-items:flex-start;color:#6b6146;line-height:1.6}
+  .resp .pd{width:11px;height:11px;border-radius:50%;flex:none;margin-top:4px;border:2px solid var(--line)}
   .resp b{color:var(--ink)}
 
   .pipeline{max-width:1220px;margin:0 auto 8px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px}
   .step{display:flex;align-items:center;gap:7px;background:var(--panel);
-    border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink-dim)}
-  .step b{color:var(--ink);font-weight:600}
+    border:2px solid var(--line);border-radius:10px;padding:6px 10px;color:var(--ink-dim)}
+  .step b{color:var(--ink);font-weight:700}
   .dot{width:10px;height:10px;border-radius:3px;flex:none}
   .dot.stock{background:transparent;border:2px dashed var(--c-stock)}
 
   .board{max-width:1220px;margin:12px auto 0;background:var(--panel);
-    border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    border:2px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:5px 5px 0 rgba(43,43,43,.12)}
   .board-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
-    padding:14px 16px 10px;border-bottom:1px solid var(--line)}
-  .board-head h2{font-size:15px;font-weight:700}
+    padding:14px 16px 10px;border-bottom:2px solid var(--soft)}
+  .board-head h2{font-size:15px;font-weight:900;display:flex;align-items:center}
+  .board-head h2::before{content:"";display:inline-block;width:28px;height:28px;flex:none;
+    background:url('cd.png') center/contain no-repeat;margin-right:8px}
   .board-head .hint{font-size:12px;color:var(--ink-dim)}
   .weeknav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .weeknav button{
-    background:var(--panel-2);border:1px solid var(--line);color:var(--ink);
-    border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;
-  }
-  .weeknav button:hover{border-color:var(--c-rec)}
-  .weeknav button:disabled{opacity:.35;cursor:default}
-  .weeknav .cur{font-size:13px;font-weight:700;color:var(--now);min-width:110px;text-align:center}
+    background:#fff;border:2px solid var(--line);color:var(--ink);
+    border-radius:10px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:2px 2px 0 rgba(43,43,43,.2)}
+  .weeknav button:hover{background:var(--brand)}
+  .weeknav button:disabled{opacity:.35;cursor:default;box-shadow:none}
+  .weeknav .cur{font-size:13px;font-weight:800;color:var(--now);min-width:110px;text-align:center}
   .scroll{overflow-x:auto;padding:20px 16px 18px}
 
   .gantt{display:grid;grid-auto-rows:54px;row-gap:4px;position:relative}
   .wk{grid-row:1;align-self:center;justify-self:center;font-size:10px;color:var(--ink-dim);
     text-align:center;line-height:1.3;cursor:pointer;border-radius:6px;padding:2px 4px}
   .wk:hover{background:var(--panel-2)}
-  .wk b{display:block;color:var(--ink);font-weight:600}
+  .wk b{display:block;color:var(--ink);font-weight:700}
   .wk.active, .wk.active b{color:var(--now)}
-  .eplabel{grid-column:1;align-self:center;font-size:12.5px;font-weight:700;
+  .eplabel{grid-column:1;align-self:center;font-size:12.5px;font-weight:800;
     color:var(--ink);white-space:nowrap;padding-right:10px;overflow:hidden;
     text-overflow:ellipsis;line-height:1.35}
   .eplabel small{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
     font-weight:400;font-size:10.5px;color:var(--ink-dim);
     white-space:normal;overflow:hidden;text-overflow:ellipsis;line-height:1.45}
-  .eplabel .host{color:var(--c-read);font-weight:600}
-  .eplabel .t-copy{color:var(--c-copy);font-weight:600}
-  .eplabel .t-edit{color:var(--c-edit);font-weight:600}
-  .eplabel .t-sched{color:var(--c-sched);font-weight:600}
-  .eplabel .t-eb{color:var(--c-sched);font-weight:700}
-  .eplabel .t-paper{color:var(--c-edit);font-weight:700}
-  .bar{align-self:center;height:16px;border-radius:4px;position:relative;opacity:.95;z-index:2}
-  .bar.rec{height:20px;border-radius:5px;box-shadow:0 0 10px rgba(255,93,108,.45)}
-  .bar.topic.done{opacity:.45}
+  .eplabel .host{color:var(--c-read);font-weight:700}
+  .eplabel .t-copy{color:var(--c-copy);font-weight:700}
+  .eplabel .t-edit{color:var(--c-edit);font-weight:700}
+  .eplabel .t-sched{color:var(--c-sched);font-weight:700}
+  .eplabel .t-eb{color:var(--c-sched);font-weight:800}
+  .eplabel .t-paper{color:var(--c-edit);font-weight:800}
+  .bar{align-self:center;height:16px;border-radius:5px;position:relative;opacity:.95;z-index:2;
+    box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.18)}
+  .bar.rec{height:20px;border-radius:6px;box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.22),0 0 8px rgba(229,72,77,.35)}
+  .bar.topic.done{opacity:.4}
   .bar.topic.done::after{content:"✓";position:absolute;left:50%;top:50%;
-    transform:translate(-50%,-50%);font-size:11px;color:#fff;font-weight:700}
+    transform:translate(-50%,-50%);font-size:11px;color:#fff;font-weight:800}
   .bar.stock{background:transparent!important;border:2px dashed var(--c-stock);
-    height:14px;opacity:.85}
+    height:14px;opacity:.9;box-shadow:none}
   .bar.stock::after{content:"備用庫存";position:absolute;left:8px;top:50%;
     transform:translateY(-50%);font-size:9.5px;color:var(--c-stock);white-space:nowrap;
-    letter-spacing:.08em}
-  .air{align-self:center;justify-self:center;width:14px;height:14px;background:var(--c-air);
-    transform:rotate(45deg);border-radius:2px;box-shadow:0 0 8px rgba(245,240,230,.5);z-index:2}
-  .air.solo{background:var(--c-solo);box-shadow:none;opacity:.9}
-  .recdot{align-self:center;justify-self:center;width:20px;height:20px;border-radius:50%;
-    background:var(--panel-2);border:2px solid var(--c-rec);z-index:3;
+    letter-spacing:.08em;font-weight:700}
+  .air{align-self:center;justify-self:center;width:15px;height:15px;background:var(--c-air);
+    transform:rotate(45deg);border-radius:3px;border:2px solid var(--line);z-index:2}
+  .air.solo{background:var(--c-solo)}
+  .recdot{align-self:center;justify-self:center;width:22px;height:22px;border-radius:50%;
+    background:#fff;border:2px solid var(--c-rec);z-index:3;
     display:flex;align-items:center;justify-content:center;font-size:10px;
-    box-shadow:0 0 8px rgba(255,93,108,.5)}
+    box-shadow:2px 2px 0 rgba(43,43,43,.2)}
   .recdot::after{content:"🎙"}
-  .recdot.late{border-color:var(--c-edit);box-shadow:0 0 8px rgba(255,179,71,.5)}
-  .gridline{position:absolute;top:58px;bottom:0;width:1px;background:var(--line);opacity:.45;pointer-events:none}
-  .soloband{position:absolute;top:58px;bottom:0;background:rgba(91,98,140,.16);
-    border-left:1px dashed var(--c-solo);border-right:1px dashed var(--c-solo);
+  .recdot.late{border-color:var(--c-edit)}
+  .gridline{position:absolute;top:58px;bottom:0;width:1px;background:rgba(43,43,43,.1);pointer-events:none}
+  .soloband{position:absolute;top:58px;bottom:0;background:rgba(154,163,178,.14);
+    border-left:2px dashed var(--c-solo);border-right:2px dashed var(--c-solo);
     pointer-events:none;z-index:1}
   .soloband em{position:absolute;top:6px;left:50%;transform:translateX(-50%);
-    font-style:normal;font-size:10px;color:var(--c-solo);white-space:nowrap;
-    letter-spacing:.15em;font-weight:700}
-  .nowline{position:absolute;top:0;bottom:0;width:2px;background:var(--now);
-    box-shadow:0 0 12px rgba(255,93,108,.6);pointer-events:none;z-index:5;
+    font-style:normal;font-size:10px;color:#5f6c80;white-space:nowrap;
+    letter-spacing:.15em;font-weight:800}
+  .nowline{position:absolute;top:0;bottom:0;width:2.5px;background:var(--now);
+    box-shadow:0 0 10px rgba(229,72,77,.5);pointer-events:none;z-index:5;
     transition:left .25s ease}
   .nowtag{position:absolute;top:-4px;transform:translateX(-50%);
-    background:var(--now);color:#fff;font-size:10px;font-weight:700;
-    padding:2px 8px;border-radius:999px;white-space:nowrap;z-index:6;
-    transition:left .25s ease}
+    background:var(--now);color:#fff;font-size:10px;font-weight:800;
+    padding:2px 9px;border-radius:999px;white-space:nowrap;z-index:6;
+    border:2px solid var(--line);transition:left .25s ease}
 
   .slice{max-width:1220px;margin:14px auto 0;background:var(--panel-2);
-    border:1px solid var(--line);border-radius:14px;padding:16px}
-  .slice h2{font-size:15px;margin-bottom:4px}
-  .slice p.sub{font-size:12px;color:var(--ink-dim);margin-bottom:12px}
+    border:2px solid var(--line);border-radius:16px;padding:16px;
+    box-shadow:4px 4px 0 rgba(43,43,43,.1)}
+  .slice h2{font-size:15px;font-weight:900;margin-bottom:4px;display:flex;align-items:center}
+  .slice h2::before{content:"";display:inline-block;width:28px;height:28px;flex:none;
+    background:url('book.png') center/contain no-repeat;margin-right:8px}
+  .slice p.sub{font-size:12px;color:#6b6146;margin-bottom:12px}
   .slice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-  .task{border:1px solid var(--line);border-left-width:4px;border-radius:8px;
-    background:var(--panel);padding:10px 12px;font-size:12.5px}
-  .task b{display:block;font-size:13px;margin-bottom:3px}
+  .task{border:2px solid var(--line);border-left-width:6px;border-radius:10px;
+    background:var(--panel);padding:10px 12px;font-size:12.5px;
+    box-shadow:3px 3px 0 rgba(43,43,43,.1)}
+  .task b{display:block;font-size:13px;font-weight:800;margin-bottom:3px}
   .task > span{color:var(--ink-dim);display:block;font-size:11.5px}
   .empty{color:var(--ink-dim);font-size:13px;padding:8px 2px}
   .todo{display:flex;align-items:flex-start;gap:8px;margin-top:7px;cursor:pointer;
@@ -192,37 +229,42 @@
     flex:none;cursor:pointer}
   .todo.checked .txt{color:var(--ink-dim);text-decoration:line-through}
   .todo.info{cursor:default;color:var(--ink-dim)}
-  .todo .dl{font-style:normal;color:var(--c-edit);font-weight:700;display:inline-block}
+  .todo .dl{font-style:normal;color:var(--c-edit);font-weight:800;display:inline-block}
   .todo.checked .dl{opacity:.5}
-  .who{display:inline-block;font-size:10px;font-weight:700;border-radius:999px;
-    padding:1px 7px;margin-left:5px;vertical-align:1px;color:#0e1120}
-  .who.un{background:transparent;border:1px dashed var(--c-rec);color:var(--c-rec)}
-  .ebook{display:inline-block;font-size:10px;font-weight:700;border-radius:4px;
-    padding:1px 6px;margin-left:5px;background:rgba(63,214,176,.15);
-    color:var(--c-sched);border:1px solid rgba(63,214,176,.4);vertical-align:1px}
-  .ebook.paper{background:rgba(255,179,71,.12);color:var(--c-edit);
-    border-color:rgba(255,179,71,.4)}
+  .who{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;
+    padding:1px 8px;margin-left:5px;vertical-align:1px;color:#fff}
+  .who.un{background:transparent;border:1.5px dashed var(--c-rec);color:var(--c-rec)}
+  .ebook{display:inline-block;font-size:10px;font-weight:800;border-radius:5px;
+    padding:1px 6px;margin-left:5px;background:rgba(30,158,111,.12);
+    color:var(--c-sched);border:1.5px solid rgba(30,158,111,.45);vertical-align:1px}
+  .ebook.paper{background:rgba(240,140,0,.1);color:var(--c-edit);
+    border-color:rgba(240,140,0,.45)}
 
-  .notes{max-width:1220px;margin:16px auto 0;font-size:12.5px;color:var(--ink-dim);line-height:1.9}
+  .notes{max-width:1220px;margin:16px auto 0;font-size:12.5px;color:#6b6146;line-height:1.9}
   .notes b{color:var(--ink)}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="eyebrow mono">宅宅下班中 · PRODUCTION BOARD</div>
-  <h1>節目製作看板
-    <small>資料來源：Google Sheet｜在 Sheet 新增或修改，重新整理本頁即同步</small>
-  </h1>
+  <img src="logotype.png" class="brandlogo" alt="宅宅下班中">
+  <div>
+    <div class="eyebrow mono">ON AIR · 每週五 11:00（台灣）</div>
+    <h1>節目製作看板
+      <small>資料來源：Google Sheet｜在 Sheet 新增或修改，重新整理本頁即同步</small>
+    </h1>
+  </div>
+  <a id="alertBadge" href="#alertTop" class="alertbadge"></a>
 </header>
 
 <div class="banner" id="banner"></div>
 
-<!-- 🚨 逾期警戒 -->
-<div class="alertbox" id="alertbox"></div>
 
 <!-- ① 接下來播出 -->
 <div class="nextup" id="nextup"></div>
+
+<!-- 🚨 進行中：未準時完成（接下來播出下方） -->
+<div class="alertbox" id="alertTop"></div>
 
 <!-- ② 四人本週看板 -->
 <div class="crewsec">
@@ -280,10 +322,13 @@
 
 <div class="notes">
   <b>Google Sheet 欄位格式（第一列為標題列，順序不限，可有多餘欄位）：</b><br>
-  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」）。③ <b>講者</b>：這集上場的人，可多人（例：梅、熊）；閱讀與錄音會指派給講者。找不到「講者」欄時退回讀「選書人」欄。④ <b>作品</b>：可留空＝已排檔期待選題，逾期會顯示 🚨。⑤ <b>錄音日期</b>：任何集數皆可填，會顯示 🎙 圓點且切面以實際日期為準；晚於播出前四週會警示。⑥ <b>文案</b>：撰寫文案的人。⑦ <b>剪輯</b>：剪輯的人。⑧ <b>排程</b>：可留空，預設阿植。⑨ <b>電子書</b>：填「有」或平台名（如 BookWalker）→ 顯示 📖 標記；填「無」→ 顯示 ⚠ 僅實體提醒（閱讀期前記得先取得書）；留空＝未確認。⑩ <b>完成追蹤欄</b>：錄音安排完成日期（死線＝播出前 11 週；已填錄音日期欄視同完成）、錄音完成（前 4 週）、文案完成日期／剪輯完成日期（前 2 週）、排程完成日期（前 1 週）——填日期或任何文字（如 V）皆算完成；<b>留空且超過死線會在頁面最上方顯示 🚨 紅色警戒</b>，已播出的集數不再警示。⑪ <b>備註</b>：自由填寫。<br>
+  ① <b>播出日期</b>：YYYY/MM/DD，須為週五；墊檔集留空。② <b>類型</b>：推薦／個人／墊檔（其他文字視同「推薦」）。③ <b>講者</b>：這集上場的人，可多人（例：梅、熊）；閱讀與錄音會指派給講者。找不到「講者」欄時退回讀「選書人」欄。④ <b>作品</b>：可留空＝已排檔期待選題，逾期會顯示 🚨。⑤ <b>錄音日期</b>：任何集數皆可填，會顯示 🎙 圓點且切面以實際日期為準；晚於播出前四週會警示。⑥ <b>文案</b>：撰寫文案的人。⑦ <b>剪輯</b>：剪輯的人。⑧ <b>排程</b>：可留空，預設阿植。⑨ <b>電子書</b>：核取方塊——勾選（TRUE）顯示 📖 電子書標記；未勾選（FALSE）或空白不顯示。填文字（如平台名 BookWalker）也可以，會一併顯示。⑩ <b>完成追蹤欄</b>：錄音安排完成日期（死線＝播出前 11 週；已填錄音日期欄視同完成）、錄音完成（前 4 週）、文案完成日期／剪輯完成日期（前 2 週）、排程完成日期（前 1 週）——<b>填入日期後，對應待辦的核取方塊會自動打勾並顯示完成日期（全隊一致，以 Sheet 為準）</b>；留空且超過死線：節目未播出者顯示在頁面上方 🚨 進行中警戒，已過播出時間者沉到頁面最底的 🗂 紀錄區。⑪ <b>備註</b>：自由填寫。<br>
   <b>人名寫法</b>：全名或簡稱皆可辨識（大酸梅／酸梅／梅、阿植／植、趴趴熊／熊、布菇／菇），多人用頓號或逗號分隔。<br>
   <b>管線規則</b>：選題（前 13–11 週）→ 閱讀（前 11–5 週）→ 錄音完成（前 4 週）→ 文案剪輯完成（前 2 週）→ 排程完成（前 1 週）。
 </div>
+
+<!-- 🗂 頁面最底：已過播出時間的未完成紀錄 -->
+<div class="alertbox past" id="alertPast"></div>
 
 <script>
 (function(){
@@ -295,10 +340,10 @@
   /* ============================================================ */
 
   const PEOPLE = [
-    {name:"布菇",   aliases:["布菇","菇"],            color:"var(--p-bugu)", hex:"#8b7ff5"},
-    {name:"阿植",   aliases:["阿植","植"],            color:"var(--p-azhi)", hex:"#3fd6b0"},
-    {name:"大酸梅", aliases:["大酸梅","酸梅","梅"],   color:"var(--p-mei)",  hex:"#4da3ff"},
-    {name:"趴趴熊", aliases:["趴趴熊","趴趴","熊"],   color:"var(--p-papa)", hex:"#ffb347"},
+    {name:"布菇",   aliases:["布菇","菇"],            color:"var(--p-bugu)", hex:"#7C5CD6"},
+    {name:"阿植",   aliases:["阿植","植"],            color:"var(--p-azhi)", hex:"#1E9E6F"},
+    {name:"大酸梅", aliases:["大酸梅","酸梅","梅"],   color:"var(--p-mei)",  hex:"#2F7FD6"},
+    {name:"趴趴熊", aliases:["趴趴熊","趴趴","熊"],   color:"var(--p-papa)", hex:"#F08C00"},
   ];
   const ALLNAMES = PEOPLE.map(p=>p.name);
   const SUPERVISOR = "布菇";
@@ -351,6 +396,7 @@
 
   const COL_W = 44, LABEL_W = 250;
   const DAY = 86400000;
+  const BROADCAST_MS = 3*3600*1000; // 台灣（UTC+8）週五 11:00 = UTC 03:00
   const g = document.getElementById("gantt");
   const banner = document.getElementById("banner");
 
@@ -378,18 +424,19 @@
     const n = new Date();
     return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate());
   }
-  // 電子書狀態：1=有電子書, -1=僅實體, 0=未填
+  // 電子書（核取方塊）：TRUE=有電子書 → 顯示標記；FALSE／空白 → 不顯示
   function ebookStatus(v){
     const s = String(v||"").trim();
     if(!s) return 0;
-    if(/^(無|否|沒有|x|X|no|No|N)$/.test(s)) return -1;
-    return 1;
+    if(/^false$/i.test(s)) return 0;
+    if(/^(無|否|沒有|x|X|no|No|N)$/.test(s)) return 0;
+    return 1; // TRUE 或其他文字（如平台名）皆視為有
   }
   function ebookText(ep){
-    const st = ebookStatus(ep.ebook);
-    if(st === 1) return "📖 電子書" + (/^(有|是|✓|v|V|yes|Yes|Y|o|O)$/.test(ep.ebook.trim()) ? "" : "（" + ep.ebook.trim() + "）");
-    if(st === -1) return "⚠ 僅實體";
-    return "";
+    if(ebookStatus(ep.ebook) !== 1) return "";
+    const s = ep.ebook.trim();
+    if(/^(true|有|是|✓|v|V|yes|Yes|Y|o|O)$/i.test(s)) return "📖 電子書";
+    return "📖 電子書（" + s + "）";
   }
 
   function parseCSV(text){
@@ -497,23 +544,25 @@
           if(ep.recTs) return; // 已定錄音日：由實際日期驅動
           todos.push({key:"rec", base:name,
             warn:(w === ep.air + s.to) ? "錄音完成死線" : null,
+            done:ep.recDone,
             people:spkPeople.length ? spkPeople : ALLNAMES.slice()});
           return;
         }
         if(s.key === "edit"){
           const warn = (w === ep.air + s.to) ? "⚠ 剪輯死線" : null;
-          todos.push({key:"copy", base:name + "：文案", warn:warn, people:matchPeople(ep.copy)});
-          todos.push({key:"edit", base:name + "：剪輯", warn:warn, people:matchPeople(ep.edit)});
+          todos.push({key:"copy", base:name + "：文案", warn:warn, done:ep.copyDone, people:matchPeople(ep.copy)});
+          todos.push({key:"edit", base:name + "：剪輯", warn:warn, done:ep.editDone, people:matchPeople(ep.edit)});
           return;
         }
         if(s.key === "sched"){
           const p = matchPeople(ep.sch);
-          todos.push({key:"sched", base:name, warn:null, people:p.length ? p : [SCHEDULER]});
+          todos.push({key:"sched", base:name, warn:null, done:ep.schedDone, people:p.length ? p : [SCHEDULER]});
         }
       });
       if(ep.recTs && weekOf(ep.recTs) === w){
         todos.push({key:"rec", base:name + "（錄音日 " + dateLabel(ep.recTs) + "）",
           warn:(weekOf(ep.recTs) > ep.air - 4) ? "⚠ 晚於錄音死線" : null,
+          done:ep.recDone,
           people:spkPeople.length ? spkPeople : ALLNAMES.slice()});
       }
     });
@@ -533,13 +582,13 @@
         if(s.key === "stock"){ infos.push({group:"stock", base:"《" + sb.title + "》"}); return; }
         if(s.key === "rec"){
           todos.push({key:"rec", base:"《" + sb.title + "》" + (sb.recTs ? "（錄音日 " + dateLabel(sb.recTs) + "）" : ""),
-            warn:null, people:matchPeople(sb.spk).length ? matchPeople(sb.spk) : ALLNAMES.slice()});
+            warn:null, done:sb.recDone, people:matchPeople(sb.spk).length ? matchPeople(sb.spk) : ALLNAMES.slice()});
           return;
         }
         if(s.key === "edit"){
           const warn = (w === s.to) ? "⚠ 剪輯死線" : null;
-          todos.push({key:"copy", base:"《" + sb.title + "》：文案", warn:warn, people:matchPeople(sb.copy)});
-          todos.push({key:"edit", base:"《" + sb.title + "》：剪輯", warn:warn, people:matchPeople(sb.edit)});
+          todos.push({key:"copy", base:"《" + sb.title + "》：文案", warn:warn, done:sb.copyDone, people:matchPeople(sb.copy)});
+          todos.push({key:"edit", base:"《" + sb.title + "》：剪輯", warn:warn, done:sb.editDone, people:matchPeople(sb.edit)});
         }
       });
     });
@@ -560,10 +609,25 @@
     }).join("");
   }
 
+  function doneLabel(v){
+    const ts = parseDateUTC(v);
+    return ts ? "✓ " + dateLabel(ts) + " 完成" : "✓ 已完成";
+  }
+
   function makeTodoRow(w, it, showWho){
+    const lab = document.createElement("label");
+    // Sheet 完成欄有值：自動打勾、鎖定、顯示完成日期（全隊一致）
+    if(it.done && String(it.done).trim() !== ""){
+      lab.className = "todo checked donefix";
+      lab.innerHTML = "<input type='checkbox' checked disabled>" +
+        "<span class='txt'>" + it.base +
+        (it.extra ? " <span class='ebook'>" + it.extra + "</span>" : "") +
+        " <span class='donedate'>" + doneLabel(it.done) + "</span>" +
+        (showWho ? whoChips(it) : "") + "</span>";
+      return lab;
+    }
     const ticks = loadTodos();
     const id = todoId(w, it);
-    const lab = document.createElement("label");
     lab.className = "todo" + (ticks[id] ? " checked" : "");
     lab.innerHTML = "<input type='checkbox'" + (ticks[id] ? " checked" : "") + ">" +
       "<span class='txt'>" + it.base +
@@ -588,11 +652,14 @@
     {field:"schedDone", label:"排程完成", offWeeks:1},
   ];
   function renderAlerts(){
-    const box = document.getElementById("alertbox");
-    const nowT = todayTs();
-    const items = [];
+    const top = document.getElementById("alertTop");
+    const past = document.getElementById("alertPast");
+    const badge = document.getElementById("alertBadge");
+    const nowT = todayTs(), nowMs = Date.now();
+    const active = [], archived = [];
     team.forEach(ep=>{
-      if(!ep.airTs || ep.airTs < nowT) return; // 已播出的不再警示
+      if(!ep.airTs) return;
+      const aired = (ep.airTs + BROADCAST_MS) <= nowMs; // 已過播出時間
       CHECKS.forEach(c=>{
         let done = String(ep[c.field]||"").trim() !== "";
         if(c.field === "recArr" && ep.recTs) done = true; // 已填錄音日期＝已安排
@@ -600,47 +667,78 @@
         const deadline = ep.airTs - c.offWeeks*7*DAY;
         if(nowT > deadline){
           const daysOver = Math.round((nowT - deadline)/DAY);
-          items.push({ep, c, deadline, daysOver});
+          (aired ? archived : active).push({ep, c, deadline, daysOver});
         }
       });
     });
-    if(!items.length){ box.className = "alertbox"; box.innerHTML = ""; return; }
-    box.className = "alertbox show";
-    box.innerHTML = "<b>🚨 逾期未完成（" + items.length + " 項）——布菇請追蹤：</b>" +
-      items.map(it =>
-        "<div class='aitem'>《" + (it.ep.title || fridayLabel(it.ep.air) + " 集・作品未定") + "》" +
-        "<b>" + it.c.label + "</b>未填——死線 " + dateLabel(it.deadline) +
-        "，已超過 <b>" + it.daysOver + "</b> 天（" + fridayLabel(it.ep.air) + " 播出）</div>"
-      ).join("");
+    const line = it =>
+      "<div class='aitem'>《" + (it.ep.title || fridayLabel(it.ep.air) + " 集・作品未定") + "》" +
+      "｜未完成部分：<b>" + it.c.label + "</b>" +
+      "｜死線 " + dateLabel(it.deadline) +
+      "｜已超過 <b>" + it.daysOver + "</b> 天（" + fridayLabel(it.ep.air) + " 播出）</div>";
+
+    if(active.length){
+      top.className = "alertbox show";
+      top.innerHTML = "<b>🚨 未準時完成（進行中 " + active.length + " 項）——布菇請追蹤：</b>" +
+        active.map(line).join("");
+      badge.className = "alertbadge show";
+      badge.textContent = "🚨 " + active.length + " 項未準時完成";
+    }else{
+      top.className = "alertbox"; top.innerHTML = "";
+      badge.className = "alertbadge"; badge.textContent = "";
+    }
+
+    if(archived.length){
+      past.className = "alertbox past show";
+      past.innerHTML = "<b>🗂 已過播出時間・未在時限內完成的紀錄（" + archived.length + " 項，僅供回顧）</b>" +
+        archived.map(line).join("");
+    }else{
+      past.className = "alertbox past"; past.innerHTML = "";
+    }
   }
 
-  /* ── ① 接下來播出（以真實日期判斷：週五過後自動顯示下一集）── */
+  /* ── ① 接下來播出（台灣週五 11:00，秒級倒數）── */
+  let cdTimer = null;
   function renderNextUp(){
     const el = document.getElementById("nextup");
-    const nowT = todayTs();
+    const nowMs = Date.now();
     const upcoming = [
       ...team.map(e=>({...e, kind:"team"})),
       ...solos.map(e=>({...e, kind:"solo"}))
-    ].filter(e => e.airTs && e.airTs >= nowT).sort((a,b)=> a.airTs - b.airTs);
+    ].filter(e => e.airTs && (e.airTs + BROADCAST_MS) > nowMs)
+     .sort((a,b)=> a.airTs - b.airTs);
+    if(cdTimer){ clearInterval(cdTimer); cdTimer = null; }
     if(!upcoming.length){ el.innerHTML = "<div class='big'><div class='title'>目前沒有已排定的播出</div></div>"; return; }
     const next = upcoming[0];
     const later = upcoming.filter(e => e.airTs > next.airTs).slice(0,2);
     const spk = matchPeople(next.spk);
-    const days = Math.round((next.airTs - nowT)/DAY);
-    const cd = days === 0 ? "今天播出！" : days === 1 ? "明天" : days + " 天後";
     el.innerHTML =
       "<div class='big'>" +
-        "<div class='kicker'>▶ 接下來播出 NEXT UP</div>" +
+        "<div class='kicker'>▶ 接下來播出 NEXT UP・週五 11:00（台灣）上架</div>" +
         "<div class='title'>" + dateLabel(next.airTs) + "《" + (next.title||"作品未定") + "》" +
           (next.kind==="solo" ? "・個人節目" : "") + "</div>" +
         "<div class='meta'>" + (spk.length ? "講者：" + spk.join("、") : "講者未定") +
           (next.note ? "｜" + next.note : "") + "</div>" +
       "</div>" +
-      "<div class='countdown'>" + cd + "</div>" +
+      "<div class='countdown mono' id='cdTimer'><small>距離上架</small>--:--:--</div>" +
       (later.length ?
         "<div class='after'>再來<br>" + later.map(e =>
           "<b>" + fridayLabel(e.air) + "</b>《" + (e.title||"未定") + "》").join("<br>") + "</div>"
         : "");
+    const target = next.airTs + BROADCAST_MS;
+    const tick = ()=>{
+      const cdEl = document.getElementById("cdTimer");
+      if(!cdEl){ clearInterval(cdTimer); cdTimer = null; return; }
+      const d = target - Date.now();
+      if(d <= 0){ clearInterval(cdTimer); cdTimer = null; renderNextUp(); return; }
+      const days = Math.floor(d/DAY);
+      const h = String(Math.floor(d%DAY/3600000)).padStart(2,"0");
+      const m = String(Math.floor(d%3600000/60000)).padStart(2,"0");
+      const s = String(Math.floor(d%60000/1000)).padStart(2,"0");
+      cdEl.innerHTML = "<small>距離上架</small>" + (days>0 ? days + " 天 " : "") + h + ":" + m + ":" + s;
+    };
+    tick();
+    cdTimer = setInterval(tick, 1000);
   }
 
   /* ── ② 四人本週看板 ── */
